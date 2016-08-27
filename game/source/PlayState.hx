@@ -7,12 +7,14 @@ import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
+import flixel.input.keyboard.FlxKey;
 
 class PlayState extends FlxState
 {
-	var playerSprite:FlxSprite;
-	var xVelocity:Float;
-	var yVelocity:Float;
+	var playSprites:Array<FlxSprite>;
+	var xVelocities:Array<Float>;
+	var yVelocities:Array<Float>;
+	var keyLists:Array<Array<FlxKey>>;
 
 	var width:Float;
 	var height:Float;
@@ -20,57 +22,72 @@ class PlayState extends FlxState
 	public static inline var ACCELERATION:Float = 0.2;
 	public static inline var ANGULAR_VELOCITY:Float = 5;
 	public static inline var VELOCITY:Float = 4;
-	public static inline var friction:Float = 0.99;
+	public static inline var DRAG:Float = 0.99; //NOTE: not actual friction; make decision later
 
 	override public function create():Void
 	{
-
-		playerSprite = new PolygonSprite(25, 25, 3, 10);
-		xVelocity = yVelocity = 0;
-		add(playerSprite);
 		width = FlxG.width;
 		height = FlxG.height;
-		trace(width + " " + height);
+		playSprites = new Array<FlxSprite>();
+		xVelocities = new Array<Float>();
+		yVelocities = new Array<Float>();
+		keyLists = new Array<Array<FlxKey>>();
+
+		playSprites.push(new PolygonSprite(25, 25, 3 + Math.floor(Math.random()*7), 10));
+		keyLists.push([W,A,S,D]);
+
+		playSprites.push(new PolygonSprite(400, 400, 2, 74));
+		keyLists.push([UP, LEFT, DOWN, RIGHT]);
+
+		for(sprite in playSprites)
+		{
+			add(sprite);
+			xVelocities.push(0);
+			yVelocities.push(0);
+		}
 		super.create();
 	}
 
 	override public function update(elapsed:Float):Void
 	{
-		xVelocity *= friction;
-		yVelocity *= friction;
+		for(i in 0...playSprites.length){
+			var sprite:FlxSprite = playSprites[i];
+			xVelocities[i] *= DRAG;
+			yVelocities[i] *= DRAG;
+			if(keyLists[i].length >= 4){
+				if(FlxG.keys.anyPressed([keyLists[i][1]]))
+				{
+					sprite.angle -= ANGULAR_VELOCITY;
+				}
+				if(FlxG.keys.anyPressed([keyLists[i][3]]))
+				{
+					sprite.angle += ANGULAR_VELOCITY;
+				}
+				if(FlxG.keys.anyPressed([keyLists[i][0]]))
+				{
+					xVelocities[i] += ACCELERATION * Math.cos(Math.PI*sprite.angle/180);
+					yVelocities[i] += ACCELERATION * Math.sin(Math.PI*sprite.angle/180);
 
-		if(FlxG.keys.anyPressed([LEFT, A]))
-		{
-			playerSprite.angle -= ANGULAR_VELOCITY;
-		}
-		if(FlxG.keys.anyPressed([RIGHT, D]))
-		{
-			playerSprite.angle += ANGULAR_VELOCITY;
-		}
-		if(FlxG.keys.anyPressed([UP, W]))
-		{
-			xVelocity += ACCELERATION * Math.cos(Math.PI*playerSprite.angle/180);
-			yVelocity += ACCELERATION * Math.sin(Math.PI*playerSprite.angle/180);
+				}
+				if(FlxG.keys.anyPressed([keyLists[i][2]]))
+				{
+					xVelocities[i] -= ACCELERATION * Math.cos(Math.PI*sprite.angle/180);
+					yVelocities[i] -= ACCELERATION * Math.sin(Math.PI*sprite.angle/180);
+				}
+			}
 
-		}
-		if(FlxG.keys.anyPressed([DOWN, S]))
-		{
-			xVelocity -= ACCELERATION * Math.cos(Math.PI*playerSprite.angle/180);
-			yVelocity -= ACCELERATION * Math.sin(Math.PI*playerSprite.angle/180);
-		}
+			if(sprite.x < 0 || sprite.x > width)
+			{
+				xVelocities[i] *= -1;
+			}
+			if(sprite.y < 0 || sprite.y > height)
+			{
+				yVelocities[i] *= -1;
+			}
 
-		playerSprite.x += xVelocity;
-		playerSprite.y += yVelocity;
-
-		if(playerSprite.x < 0 || playerSprite.x > width)
-		{
-			xVelocity *= -1;
+			sprite.x += xVelocities[i];
+			sprite.y += yVelocities[i];
 		}
-		if(playerSprite.y < 0 || playerSprite.y > height)
-		{
-			yVelocity *= -1;
-		}
-
 		super.update(elapsed);
 	}
 }
