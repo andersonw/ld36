@@ -17,6 +17,7 @@ class PlayState extends FlxState
 	var playSprites:Array<NewPolygonSprite>;
 	var xVelocities:Array<Float>;
 	var yVelocities:Array<Float>;
+	var aVelocities:Array<Float>;
 	var keyLists:Array<Array<FlxKey>>;
 
 	var width:Float;
@@ -25,6 +26,8 @@ class PlayState extends FlxState
     var currentlyColliding:Bool;
 
 	public static inline var ACCELERATION:Float = 0.2;
+	public static inline var ANGULAR_ACCELERATION:Float = 2;
+	public static inline var ANGLULAR_DRAG:Float = 0.75;
 	public static inline var ANGULAR_VELOCITY:Float = 5;
 	public static inline var VELOCITY:Float = 4;
 	public static inline var DRAG:Float = 0.99;
@@ -32,12 +35,13 @@ class PlayState extends FlxState
 
     public static inline var COLLISION_THRESHOLD:Float = 5;
 
-	public function makeSprite(sprite:NewPolygonSprite, keymap:Array<FlxKey>, xv:Int = 0, yv:Int = 0):Int
+	public function makeSprite(sprite:NewPolygonSprite, keymap:Array<FlxKey>, xv:Float = 0, yv:Float = 0, av:Float = 0):Int
 	{
 		playSprites.push(sprite);
 		keyLists.push(keymap);
 		xVelocities.push(xv);
 		yVelocities.push(yv);
+		aVelocities.push(av);
 		add(sprite);
 		return playSprites.length - 1;
 	}
@@ -50,6 +54,7 @@ class PlayState extends FlxState
 		playSprites = new Array<NewPolygonSprite>();
 		xVelocities = new Array<Float>();
 		yVelocities = new Array<Float>();
+		aVelocities = new Array<Float>();
 		keyLists = new Array<Array<FlxKey>>();
 
 		makeSprite(new NewPolygonSprite(25, 25, 3 + Math.floor(Math.random()*7), 10), [W, A, S, D]);
@@ -72,14 +77,16 @@ class PlayState extends FlxState
 			var sprite:NewPolygonSprite = playSprites[i];
 			xVelocities[i] *= DRAG;
 			yVelocities[i] *= DRAG;
+			aVelocities[i] *= ANGLULAR_DRAG;
+
 			if(keyLists[i].length >= 4){
 				if(FlxG.keys.anyPressed([keyLists[i][1]]))
 				{
-					sprite.angle -= ANGULAR_VELOCITY;
+					aVelocities[i] -= ANGULAR_ACCELERATION;
 				}
 				if(FlxG.keys.anyPressed([keyLists[i][3]]))
 				{
-					sprite.angle += ANGULAR_VELOCITY;
+					aVelocities[i] += ANGULAR_ACCELERATION;
 				}
 				if(FlxG.keys.anyPressed([keyLists[i][0]]))
 				{
@@ -101,6 +108,7 @@ class PlayState extends FlxState
 
 			sprite.x += xVelocities[i];
 			sprite.y += yVelocities[i];
+			sprite.angle += aVelocities[i];
 		}
         checkCollisions();
         //checkCollisionsWithPoints();
@@ -196,7 +204,7 @@ class PlayState extends FlxState
 			rect.color = collidePointAndRect(640/2, 480/2, rect) ? FlxColor.BLUE : FlxColor.WHITE;
 		}
 	}
-
+    
 /* This was old checkCollisions code that used pixelPerfectOverlap
     private function checkCollisions():Void
     {
