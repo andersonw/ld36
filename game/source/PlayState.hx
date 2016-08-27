@@ -1,11 +1,13 @@
 package;
 
+import flixel.addons.display.FlxNestedSprite;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.math.FlxMath;
+import flixel.util.FlxCollision;
 import flixel.util.FlxColor;
 import flixel.input.keyboard.FlxKey;
 
@@ -22,7 +24,7 @@ class PlayState extends FlxState
 	public static inline var ACCELERATION:Float = 0.2;
 	public static inline var ANGULAR_VELOCITY:Float = 5;
 	public static inline var VELOCITY:Float = 4;
-	public static inline var DRAG:Float = 0.99; //NOTE: not actual friction; make decision later
+	public static inline var DRAG:Float = 0.99;
 
 	override public function create():Void
 	{
@@ -50,6 +52,8 @@ class PlayState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
+        super.update(elapsed);
+
 		for(i in 0...playSprites.length){
 			var sprite:FlxSprite = playSprites[i];
 			xVelocities[i] *= DRAG;
@@ -87,7 +91,32 @@ class PlayState extends FlxState
 
 			sprite.x += xVelocities[i];
 			sprite.y += yVelocities[i];
+            checkCollisions();
 		}
-		super.update(elapsed);
 	}
+
+    private function checkCollisions():Void
+    {
+        var player1Segments:Array<FlxNestedSprite> = cast(playSprites[0], FlxNestedSprite).children;
+        var player2Segments:Array<FlxNestedSprite> = cast(playSprites[1], FlxNestedSprite).children;
+        for (i in 0...player1Segments.length)
+        {
+            var segment1 = player1Segments[i];
+            var collides = false;
+
+            for (j in 0...player2Segments.length)
+            {
+                var segment2 = player2Segments[j];
+                if (FlxG.pixelPerfectOverlap(segment1, segment2))
+                {
+                    collides = true;
+                    //trace("COLLISION DETECTED!");
+                    break;
+                }
+            }
+
+            segment1.color = collides ? FlxColor.RED : FlxColor.WHITE;
+        }
+    }
+
 }
