@@ -2,6 +2,7 @@ package;
 
 import flixel.addons.display.FlxNestedSprite;
 import flixel.FlxG;
+import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.text.FlxText;
@@ -21,10 +22,13 @@ class PlayState extends FlxState
 	var width:Float;
 	var height:Float;
 
+    var currentlyColliding:Bool;
+
 	public static inline var ACCELERATION:Float = 0.2;
 	public static inline var ANGULAR_VELOCITY:Float = 5;
 	public static inline var VELOCITY:Float = 4;
 	public static inline var DRAG:Float = 0.99;
+    public static inline var ELASTICITY:Float = .90;
 
 	public function makeSprite(sprite:FlxSprite, keymap:Array<FlxKey>, xv:Int = 0, yv:Int = 0):Int
 	{
@@ -47,8 +51,11 @@ class PlayState extends FlxState
 		keyLists = new Array<Array<FlxKey>>();
 
 		makeSprite(new PolygonSprite(25, 25, 3 + Math.floor(Math.random()*7), 10), [W, A, S, D]);
-		makeSprite(new PolygonSprite(400, 400, 2, 74), [UP, LEFT, DOWN, RIGHT]);
-		super.create();
+		makeSprite(new PolygonSprite(400, 400, 3, 74), [UP, LEFT, DOWN, RIGHT]);
+		
+        currentlyColliding = false;
+
+        super.create();
 	}
 
 	override public function update(elapsed:Float):Void
@@ -100,6 +107,8 @@ class PlayState extends FlxState
     {
         var player1Segments:Array<FlxNestedSprite> = cast(playSprites[0], FlxNestedSprite).children;
         var player2Segments:Array<FlxNestedSprite> = cast(playSprites[1], FlxNestedSprite).children;
+        
+        var superCollides = false;
         for (i in 0...player1Segments.length)
         {
             var segment1 = player1Segments[i];
@@ -111,12 +120,23 @@ class PlayState extends FlxState
                 if (FlxG.pixelPerfectOverlap(segment1, segment2))
                 {
                     collides = true;
-                    //trace("COLLISION DETECTED!");
+                    superCollides = true;
+                    if (!currentlyColliding)
+                    {
+                        currentlyColliding = true;
+                        xVelocities[0] *= -ELASTICITY;
+                        yVelocities[0] *= -ELASTICITY;
+                        xVelocities[1] *= -ELASTICITY;
+                        yVelocities[1] *= -ELASTICITY;
+                    }
                     break;
-                }
+                }   
             }
-
             segment1.color = collides ? FlxColor.RED : FlxColor.WHITE;
+        }
+        if (!superCollides)
+        {
+            currentlyColliding = false;
         }
     }
 
