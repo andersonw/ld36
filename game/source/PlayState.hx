@@ -27,7 +27,7 @@ class PlayState extends FlxState
 
 	public static inline var ACCELERATION:Float = 0.2;
 	public static inline var ANGULAR_ACCELERATION:Float = 2;
-	public static inline var ANGLULAR_DRAG:Float = 0.75;
+	public static inline var ANGULAR_DRAG:Float = 0.75;
 	public static inline var ANGULAR_VELOCITY:Float = 5;
 	public static inline var VELOCITY:Float = 4;
 	public static inline var DRAG:Float = 0.99;
@@ -73,6 +73,8 @@ class PlayState extends FlxState
 	{
 		// TODO: adjust how drag works with frame rate
 
+		// trace("begin state update");
+
         super.update(elapsed);
 
 		for(i in 0...playSprites.length){
@@ -87,7 +89,7 @@ class PlayState extends FlxState
 			// apply drags
 			xVelocities[i] *= DRAG;
 			yVelocities[i] *= DRAG;
-			aVelocities[i] *= ANGLULAR_DRAG;
+			aVelocities[i] *= ANGULAR_DRAG;
 
 			// check key for accelerations
 			if(keyLists[i].length >= 4){
@@ -154,8 +156,11 @@ class PlayState extends FlxState
     //returns: whether a collision was found
     private function collideSpriteAPointsWithSpriteBEdges(a:Int, b:Int):Bool
     {
+        
         var playerASides:Array<FlxSprite> = playSprites[a].members;
         var playerBSides:Array<FlxSprite> = playSprites[b].members;
+        
+        // get A endppoints
         var playerAEndpointsX:Array<Float> = new Array<Float>();
         var playerAEndpointsY:Array<Float> = new Array<Float>();
         for (i in 0...playerASides.length)
@@ -168,7 +173,9 @@ class PlayState extends FlxState
             playerAEndpointsX.push(centerX - rect.width*Math.cos(radAngle)/2);
             playerAEndpointsY.push(centerY - rect.width*Math.sin(radAngle)/2);
         }
+
         var superCollides:Bool = false;
+
         for (i in 0...playerBSides.length)
         {
             var rect:FlxSprite = playerBSides[i];
@@ -176,7 +183,9 @@ class PlayState extends FlxState
 
             for (j in 0...playerASides.length)
             {
-                if (checkCollidePointAndRect(playerAEndpointsX[j], playerAEndpointsY[j], rect))
+                // if (checkCollidePointAndRect(playerAEndpointsX[j], playerAEndpointsY[j], rect))
+                var p = new Point(playerAEndpointsX[j], playerAEndpointsY[j], a);
+                if (checkCollidePointAndRect(p, rect))
                 {
                     collides = true;
                     superCollides = true;
@@ -196,37 +205,73 @@ class PlayState extends FlxState
             }
             rect.color = collides ? FlxColor.RED : FlxColor.WHITE;
         }
+
         return superCollides;
+
     }
 
-	private static function checkCollidePointAndSegment(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Bool{
-		var dist:Float = Math.abs(((x - a1) * (b2 - b1) + (b1 - y) * (a2-a1)))/Math.sqrt((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1)); //wikipedia to the rescue
-		var projectionCoord:Float = ((x-a1)*(a2-a1) + (y-b1)*(b2-b1))/((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1));
-		if(dist < COLLISION_THRESHOLD){
-			if(projectionCoord >= 0 && projectionCoord <= 1){
-				trace(dist + " " + projectionCoord + "\n");
-				return true;
-			}
+	// private static function checkCollidePointAndSegment(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Bool{
+	// 	var dist:Float = Math.abs(((x - a1) * (b2 - b1) + (b1 - y) * (a2-a1)))/Math.sqrt((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1)); //wikipedia to the rescue
+	// 	var projectionCoord:Float = ((x-a1)*(a2-a1) + (y-b1)*(b2-b1))/((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1));
+	// 	if(dist < COLLISION_THRESHOLD){
+	// 		if(projectionCoord >= 0 && projectionCoord <= 1){
+	// 			trace(dist + " " + projectionCoord + "\n");
+	// 			return true;
+	// 		}
+	// 	}
+	// 	return false;
+	// }
+
+	private function checkCollidePointAndSegment(p:Point, a1:Float, b1:Float, a2:Float, b2:Float):Bool{
+		
+		// standard form
+		var a = b2-b1;
+		var b = a1-a2;
+		var c = a*a1 + b*b1;
+
+		var currd = a*p.x + b*p.y - c;
+
+		var newx = p.x + xVelocities[p.polyInd];
+		var newy = p.y + yVelocities[p.polyInd];
+		var newd = a*newx + b*newy - c;
+
+		if( currd * newd > 0)
+			return false;
+
+		var onSegment = ((p.x-a1)*(a2-a1) + (p.y-b1)*(b2-b1)) / ((a2-a1)*(a2-a1) + (b2-b1)*(b2-b1));
+		if(onSegment > 0 && onSegment < 1){
+			return true;
 		}
+
 		return false;
+
+
 	}
 
-	private static function checkCollidePointAndRect(x:Float, y:Float, rect:FlxSprite){
+	// private static function checkCollidePointAndRect(x:Float, y:Float, rect:FlxSprite){
+	// 	var radAngle:Float = rect.angle * Math.PI / 180;
+	// 	var centerX:Float = rect.x + rect.width/2;
+	// 	var centerY:Float = rect.y + rect.height/2;
+	// 	return checkCollidePointAndSegment(x, y, centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2,
+	// 		centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2);
+	// }
+
+	private function checkCollidePointAndRect(p:Point, rect:FlxSprite){
 		var radAngle:Float = rect.angle * Math.PI / 180;
 		var centerX:Float = rect.x + rect.width/2;
 		var centerY:Float = rect.y + rect.height/2;
-		return checkCollidePointAndSegment(x, y, centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2,
+		return checkCollidePointAndSegment(p, centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2,
 			centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2);
 	}
 
-	private function checkCollisionsWithPoints():Void
-	{
-		var player1Segments:Array<FlxSprite> = playSprites[0].members;
-		for(rect in player1Segments)
-		{
-			rect.color = checkCollidePointAndRect(640/2, 480/2, rect) ? FlxColor.BLUE : FlxColor.WHITE;
-		}
-	}
+	// private function checkCollisionsWithPoints():Void
+	// {
+	// 	var player1Segments:Array<FlxSprite> = playSprites[0].members;
+	// 	for(rect in player1Segments)
+	// 	{
+	// 		rect.color = checkCollidePointAndRect(640/2, 480/2, rect) ? FlxColor.BLUE : FlxColor.WHITE;
+	// 	}
+	// }
     
 /* This was old checkCollisions code that used pixelPerfectOverlap
     private function checkCollisions():Void

@@ -51,6 +51,7 @@ class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
     }
 
     override public function update(elapsed:Float){
+        // trace(numSides);
         super.update(elapsed);
 
         var sideLength:Float = RADIUS * Math.sqrt(2*(1-Math.cos(2*Math.PI/numSides)));
