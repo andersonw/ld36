@@ -14,6 +14,9 @@ class PlayState extends FlxState
 	var xVelocity:Float;
 	var yVelocity:Float;
 
+	var width:Float;
+	var height:Float;
+
 	public static inline var ACCELERATION:Float = 0.2;
 	public static inline var ANGULAR_VELOCITY:Float = 5;
 	public static inline var VELOCITY:Float = 4;
@@ -26,6 +29,8 @@ class PlayState extends FlxState
 		xVelocity = yVelocity = 0;
 		playerSprite.makeGraphic(10, 10, FlxColor.WHITE);
 		add(playerSprite);
+		width = FlxG.height;
+		height = FlxG.width;
 		super.create();
 	}
 
@@ -57,11 +62,11 @@ class PlayState extends FlxState
 		playerSprite.x += xVelocity;
 		playerSprite.y += yVelocity;
 
-		if(playerSprite.x < 0 || playerSprite.x > 640)
+		if(playerSprite.x < 0 || playerSprite.x > width)
 		{
 			xVelocity *= -1;
 		}
-		if(playerSprite.y < 0 || playerSprite.y > 480)
+		if(playerSprite.y < 0 || playerSprite.y > height)
 		{
 			yVelocity *= -1;
 		}
