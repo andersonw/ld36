@@ -30,7 +30,7 @@ class PlayState extends FlxState
 	public static inline var DRAG:Float = 0.99;
     public static inline var ELASTICITY:Float = .90;
 
-    public static inline var COLLISION_THRESHOLD:Float = 3;
+    public static inline var COLLISION_THRESHOLD:Float = 5;
 
 	public function makeSprite(sprite:NewPolygonSprite, keymap:Array<FlxKey>, xv:Int = 0, yv:Int = 0):Int
 	{
@@ -102,9 +102,71 @@ class PlayState extends FlxState
 			sprite.x += xVelocities[i];
 			sprite.y += yVelocities[i];
 		}
-        //checkCollisions();
-        checkCollisionsWithPoints();
+        checkCollisions();
+        //checkCollisionsWithPoints();
 	}
+
+    private function checkCollisions():Void
+    {
+        var collided:Bool = collideSpriteAPointsWithSpriteBEdges(0,1);
+        if (!collided)
+        {
+            var collided2:Bool = collideSpriteAPointsWithSpriteBEdges(1,0);
+            if (!collided2)
+            {
+                currentlyColliding = false;
+            }
+        }
+    }
+
+    //this function performs collisions (i.e. it will change velocities and stuff if things collide)
+    //returns: whether a collision was found
+    private function collideSpriteAPointsWithSpriteBEdges(a:Int, b:Int):Bool
+    {
+        var playerASides:Array<FlxSprite> = playSprites[a].members;
+        var playerBSides:Array<FlxSprite> = playSprites[b].members;
+        var playerAEndpointsX:Array<Float> = new Array<Float>();
+        var playerAEndpointsY:Array<Float> = new Array<Float>();
+        for (i in 0...playerASides.length)
+        {
+            var rect:FlxSprite = playerASides[i];
+            var radAngle:Float = rect.angle * Math.PI / 180;
+            var centerX:Float = rect.x + rect.width/2;
+            var centerY:Float = rect.y + rect.height/2;
+            //gets the "left" endpoint of the rectangle
+            playerAEndpointsX.push(centerX - rect.width*Math.cos(radAngle)/2);
+            playerAEndpointsY.push(centerY - rect.width*Math.sin(radAngle)/2);
+        }
+        var superCollides:Bool = false;
+        for (i in 0...playerBSides.length)
+        {
+            var rect:FlxSprite = playerBSides[i];
+            var collides:Bool = false;
+
+            for (j in 0...playerASides.length)
+            {
+                if (collidePointAndRect(playerAEndpointsX[j], playerAEndpointsY[j], rect))
+                {
+                    collides = true;
+                    superCollides = true;
+                    if (!currentlyColliding)
+                    {
+                        currentlyColliding = true;
+                        var tmp:Float = xVelocities[0];
+                        xVelocities[0] = xVelocities[1];
+                        xVelocities[1] = tmp;
+
+                        tmp = yVelocities[0];
+                        yVelocities[0] = yVelocities[1];
+                        yVelocities[1] = tmp;
+                    }
+                    break;
+                }
+            }
+            rect.color = collides ? FlxColor.RED : FlxColor.WHITE;
+        }
+        return superCollides;
+    }
 
 	private static function collidePointAndSegment(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Bool{
 		var dist:Float = Math.abs(((x - a1) * (b2 - b1) + (b1 - y) * (a2-a1)))/Math.sqrt((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1)); //wikipedia to the rescue
@@ -135,6 +197,7 @@ class PlayState extends FlxState
 		}
 	}
 
+/* This was old checkCollisions code that used pixelPerfectOverlap
     private function checkCollisions():Void
     {
         var player1Segments:Array<FlxSprite> = playSprites[0].members;
@@ -174,5 +237,5 @@ class PlayState extends FlxState
             currentlyColliding = false;
         }
     }
-
+*/
 }
