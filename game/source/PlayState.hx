@@ -92,8 +92,8 @@ class PlayState extends FlxState
 
 			sprite.x += xVelocities[i];
 			sprite.y += yVelocities[i];
-            checkCollisions();
 		}
+        checkCollisions();
 	}
 
     private function checkCollisions():Void
