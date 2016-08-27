@@ -30,6 +30,8 @@ class PlayState extends FlxState
 	public static inline var DRAG:Float = 0.99;
     public static inline var ELASTICITY:Float = .90;
 
+    public static inline var COLLISION_THRESHOLD:Float = 3;
+
 	public function makeSprite(sprite:NewPolygonSprite, keymap:Array<FlxKey>, xv:Int = 0, yv:Int = 0):Int
 	{
 		playSprites.push(sprite);
@@ -52,6 +54,10 @@ class PlayState extends FlxState
 
 		makeSprite(new NewPolygonSprite(25, 25, 3 + Math.floor(Math.random()*7), 10), [W, A, S, D]);
 		makeSprite(new NewPolygonSprite(400, 400, 3, 74), [UP, LEFT, DOWN, RIGHT]);
+
+		var temporaryCenter:FlxSprite = new FlxSprite(640/2-3, 480/2-3);
+		temporaryCenter.makeGraphic(6, 6, FlxColor.BLUE);
+		add(temporaryCenter);
 		
         currentlyColliding = false;
 
@@ -96,7 +102,37 @@ class PlayState extends FlxState
 			sprite.x += xVelocities[i];
 			sprite.y += yVelocities[i];
 		}
-        checkCollisions();
+        //checkCollisions();
+        checkCollisionsWithPoints();
+	}
+
+	private static function collidePointAndSegment(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Bool{
+		var dist:Float = Math.abs(((x - a1) * (b2 - b1) + (b1 - y) * (a2-a1)))/Math.sqrt((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1)); //wikipedia to the rescue
+		var projectionCoord:Float = ((x-a1)*(a2-a1) + (y-b1)*(b2-b1))/((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1));
+		if(dist < COLLISION_THRESHOLD){
+			if(projectionCoord >= 0 && projectionCoord <= 1){
+				trace(dist + " " + projectionCoord + "\n");
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static function collidePointAndRect(x:Float, y:Float, rect:FlxSprite){
+		var radAngle:Float = rect.angle * Math.PI / 180;
+		var centerX:Float = rect.x + rect.width/2;
+		var centerY:Float = rect.y + rect.height/2;
+		return collidePointAndSegment(x, y, centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2,
+			centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2);
+	}
+
+	private function checkCollisionsWithPoints():Void
+	{
+		var player1Segments:Array<FlxSprite> = playSprites[0].members;
+		for(rect in player1Segments)
+		{
+			rect.color = collidePointAndRect(640/2, 480/2, rect) ? FlxColor.BLUE : FlxColor.WHITE;
+		}
 	}
 
     private function checkCollisions():Void

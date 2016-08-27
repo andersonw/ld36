@@ -13,7 +13,7 @@ class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
     public var x:Float;
     public var y:Float;
     public var angle:Float;
-    var numSides:Int;
+    public var numSides:Int;
     var relativeX:Array<Float>;
 
 
