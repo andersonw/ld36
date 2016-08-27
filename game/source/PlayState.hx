@@ -71,6 +71,8 @@ class PlayState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
+		// TODO: adjust how drag works with frame rate
+		
         super.update(elapsed);
 
 		for(i in 0...playSprites.length){
@@ -82,22 +84,22 @@ class PlayState extends FlxState
 			if(keyLists[i].length >= 4){
 				if(FlxG.keys.anyPressed([keyLists[i][1]]))
 				{
-					aVelocities[i] -= ANGULAR_ACCELERATION;
+					aVelocities[i] -= ANGULAR_ACCELERATION * 60 * elapsed;
 				}
 				if(FlxG.keys.anyPressed([keyLists[i][3]]))
 				{
-					aVelocities[i] += ANGULAR_ACCELERATION;
+					aVelocities[i] += ANGULAR_ACCELERATION * 60 * elapsed;
 				}
 				if(FlxG.keys.anyPressed([keyLists[i][0]]))
 				{
-					xVelocities[i] += ACCELERATION * Math.cos(Math.PI*sprite.angle/180);
-					yVelocities[i] += ACCELERATION * Math.sin(Math.PI*sprite.angle/180);
+					xVelocities[i] += ACCELERATION * Math.cos(Math.PI*sprite.angle/180) * 60 * elapsed;
+					yVelocities[i] += ACCELERATION * Math.sin(Math.PI*sprite.angle/180) * 60 * elapsed;
 
 				}
 				if(FlxG.keys.anyPressed([keyLists[i][2]]))
 				{
-					xVelocities[i] -= ACCELERATION * Math.cos(Math.PI*sprite.angle/180);
-					yVelocities[i] -= ACCELERATION * Math.sin(Math.PI*sprite.angle/180);
+					xVelocities[i] -= ACCELERATION * Math.cos(Math.PI*sprite.angle/180) * 60 * elapsed;
+					yVelocities[i] -= ACCELERATION * Math.sin(Math.PI*sprite.angle/180) * 60 * elapsed;
 				}
 			}
 
@@ -106,9 +108,9 @@ class PlayState extends FlxState
 			if(sprite.y < 0 && yVelocities[i] < 0) yVelocities[i] *= -1;
 			if(sprite.y > height && yVelocities[i] > 0) yVelocities[i] *= -1;
 
-			sprite.x += xVelocities[i];
-			sprite.y += yVelocities[i];
-			sprite.angle += aVelocities[i];
+			sprite.x += xVelocities[i] * 60 * elapsed;
+			sprite.y += yVelocities[i] * 60 * elapsed;
+			sprite.angle += aVelocities[i] * 60 * elapsed;
 		}
         checkCollisions();
         //checkCollisionsWithPoints();
