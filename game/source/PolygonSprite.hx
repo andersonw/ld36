@@ -19,6 +19,11 @@ class PolygonSprite extends FlxNestedSprite
         //var rectList:Array<FlxSprite> = new Array<FlxSprite>();
         var interiorAngle:Float = Math.PI*(numSides-2)/numSides;
         var apothemLength:Float = Math.sqrt(RADIUS*RADIUS-(sideLength/2)*(sideLength/2));
+        var indicator = new FlxNestedSprite();
+        indicator.relativeX = 0;
+        indicator.relativeY = -2;
+        indicator.makeGraphic(cast RADIUS, 4, FlxColor.WHITE);
+        add(indicator);
         for (i in 0...numSides)
         {
             var rectX:Float = apothemLength*Math.cos(Math.PI/numSides+2*i*Math.PI/numSides)-sideLength/2;

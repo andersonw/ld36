@@ -25,9 +25,8 @@ class PlayState extends FlxState
 	override public function create():Void
 	{
 
-		playerSprite = new PolygonSprite(25, 25, 9, 10);
+		playerSprite = new PolygonSprite(25, 25, 3, 10);
 		xVelocity = yVelocity = 0;
-		playerSprite.makeGraphic(10, 10, FlxColor.WHITE);
 		add(playerSprite);
 		width = FlxG.height;
 		height = FlxG.width;
