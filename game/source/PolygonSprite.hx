@@ -3,10 +3,12 @@ package;
 import flixel.util.FlxColor;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
+import flixel.math.FlxPoint;
+import flixel.addons.display.FlxNestedSprite;
 
 class PolygonSprite extends FlxSpriteGroup
 {
-    public static inline var RADIUS = 100;
+    public static inline var RADIUS:Float = 100;
 
     public function new(centerX:Float, centerY:Float, numSides:Int, angle:Float):Void
     {
@@ -25,6 +27,7 @@ class PolygonSprite extends FlxSpriteGroup
             rect.angle = (i+0.5)*360.0/numSides+90;
             add(rect);
         }
+        forEach(function(s:FlxSprite){s.origin.set(centerX, centerY);});
         this.angle = angle;
     }
 }
