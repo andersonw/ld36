@@ -28,8 +28,9 @@ class PlayState extends FlxState
 		playerSprite = new PolygonSprite(25, 25, 3, 10);
 		xVelocity = yVelocity = 0;
 		add(playerSprite);
-		width = FlxG.height;
-		height = FlxG.width;
+		width = FlxG.width;
+		height = FlxG.height;
+		trace(width + " " + height);
 		super.create();
 	}
 
