@@ -72,15 +72,24 @@ class PlayState extends FlxState
 	override public function update(elapsed:Float):Void
 	{
 		// TODO: adjust how drag works with frame rate
-		
+
         super.update(elapsed);
 
 		for(i in 0...playSprites.length){
+			
 			var sprite:NewPolygonSprite = playSprites[i];
+
+			// apply velocities
+			sprite.x += xVelocities[i] * 60 * elapsed;
+			sprite.y += yVelocities[i] * 60 * elapsed;
+			sprite.angle += aVelocities[i] * 60 * elapsed;
+			
+			// apply drags
 			xVelocities[i] *= DRAG;
 			yVelocities[i] *= DRAG;
 			aVelocities[i] *= ANGLULAR_DRAG;
 
+			// check key for accelerations
 			if(keyLists[i].length >= 4){
 				if(FlxG.keys.anyPressed([keyLists[i][1]]))
 				{
@@ -103,14 +112,12 @@ class PlayState extends FlxState
 				}
 			}
 
+			// keep sprites within bounds
 			if(sprite.x < 0 && xVelocities[i] < 0) xVelocities[i] *= -1;
 			if(sprite.x > width && xVelocities[i] > 0) xVelocities[i] *= -1;
 			if(sprite.y < 0 && yVelocities[i] < 0) yVelocities[i] *= -1;
 			if(sprite.y > height && yVelocities[i] > 0) yVelocities[i] *= -1;
 
-			sprite.x += xVelocities[i] * 60 * elapsed;
-			sprite.y += yVelocities[i] * 60 * elapsed;
-			sprite.angle += aVelocities[i] * 60 * elapsed;
 		}
         checkCollisions();
         //checkCollisionsWithPoints();
@@ -118,15 +125,29 @@ class PlayState extends FlxState
 
     private function checkCollisions():Void
     {
+    	var setCurrentlyCollidingFalse = true;
+
         var collided:Bool = collideSpriteAPointsWithSpriteBEdges(0,1);
-        if (!collided)
-        {
-            var collided2:Bool = collideSpriteAPointsWithSpriteBEdges(1,0);
-            if (!collided2)
-            {
-                currentlyColliding = false;
-            }
-        }
+        if(collided)
+        	setCurrentlyCollidingFalse = false;
+
+        var collided2:Bool = collideSpriteAPointsWithSpriteBEdges(1,0);
+        if(collided2)
+        	setCurrentlyCollidingFalse = false;
+
+        if(setCurrentlyCollidingFalse)
+        	currentlyColliding = false;
+
+
+        // var collided:Bool = collideSpriteAPointsWithSpriteBEdges(0,1);
+        // if (!collided)
+        // {
+        //     var collided2:Bool = collideSpriteAPointsWithSpriteBEdges(1,0);
+        //     if (!collided2)
+        //     {
+        //         currentlyColliding = false;
+        //     }
+        // }
     }
 
     //this function performs collisions (i.e. it will change velocities and stuff if things collide)
@@ -155,7 +176,7 @@ class PlayState extends FlxState
 
             for (j in 0...playerASides.length)
             {
-                if (collidePointAndRect(playerAEndpointsX[j], playerAEndpointsY[j], rect))
+                if (checkCollidePointAndRect(playerAEndpointsX[j], playerAEndpointsY[j], rect))
                 {
                     collides = true;
                     superCollides = true;
@@ -178,7 +199,7 @@ class PlayState extends FlxState
         return superCollides;
     }
 
-	private static function collidePointAndSegment(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Bool{
+	private static function checkCollidePointAndSegment(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Bool{
 		var dist:Float = Math.abs(((x - a1) * (b2 - b1) + (b1 - y) * (a2-a1)))/Math.sqrt((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1)); //wikipedia to the rescue
 		var projectionCoord:Float = ((x-a1)*(a2-a1) + (y-b1)*(b2-b1))/((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1));
 		if(dist < COLLISION_THRESHOLD){
@@ -190,11 +211,11 @@ class PlayState extends FlxState
 		return false;
 	}
 
-	private static function collidePointAndRect(x:Float, y:Float, rect:FlxSprite){
+	private static function checkCollidePointAndRect(x:Float, y:Float, rect:FlxSprite){
 		var radAngle:Float = rect.angle * Math.PI / 180;
 		var centerX:Float = rect.x + rect.width/2;
 		var centerY:Float = rect.y + rect.height/2;
-		return collidePointAndSegment(x, y, centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2,
+		return checkCollidePointAndSegment(x, y, centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2,
 			centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2);
 	}
 
@@ -203,7 +224,7 @@ class PlayState extends FlxState
 		var player1Segments:Array<FlxSprite> = playSprites[0].members;
 		for(rect in player1Segments)
 		{
-			rect.color = collidePointAndRect(640/2, 480/2, rect) ? FlxColor.BLUE : FlxColor.WHITE;
+			rect.color = checkCollidePointAndRect(640/2, 480/2, rect) ? FlxColor.BLUE : FlxColor.WHITE;
 		}
 	}
     
