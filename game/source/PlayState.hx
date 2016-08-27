@@ -88,15 +88,11 @@ class PlayState extends FlxState
 				}
 			}
 
-			if(sprite.x < 0 || sprite.x > width)
-			{
-				xVelocities[i] *= -1;
-			}
-			if(sprite.y < 0 || sprite.y > height)
-			{
-				yVelocities[i] *= -1;
-			}
-
+			if(sprite.x < 0 && xVelocities[i] < 0) xVelocities[i] *= -1;
+			if(sprite.x > width && xVelocities[i] > 0) xVelocities[i] *= -1;
+			if(sprite.y < 0 && yVelocities[i] < 0) yVelocities[i] *= -1;
+			if(sprite.y > height && yVelocities[i] > 0) yVelocities[i] *= -1;
+			
 			sprite.x += xVelocities[i];
 			sprite.y += yVelocities[i];
 		}
