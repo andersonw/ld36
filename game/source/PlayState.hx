@@ -26,14 +26,14 @@ class PlayState extends FlxState
     var currentlyColliding:Bool;
 
 	public static inline var ACCELERATION:Float = 0.2;
-	public static inline var ANGULAR_ACCELERATION:Float = 2;
-	public static inline var ANGLULAR_DRAG:Float = 0.75;
+	public static inline var ANGULAR_ACCELERATION:Float = 1;
+	public static inline var ANGLULAR_DRAG:Float = 0.85;
 	public static inline var ANGULAR_VELOCITY:Float = 5;
 	public static inline var VELOCITY:Float = 4;
 	public static inline var DRAG:Float = 0.99;
     public static inline var ELASTICITY:Float = .90;
 
-    public static inline var COLLISION_THRESHOLD:Float = 5;
+    public static inline var COLLISION_THRESHOLD:Float = 10;
 
 	public function makeSprite(sprite:NewPolygonSprite, keymap:Array<FlxKey>, xv:Float = 0, yv:Float = 0, av:Float = 0):Int
 	{
@@ -199,16 +199,26 @@ class PlayState extends FlxState
         return superCollides;
     }
 
+    private static function distanceFromPointToSegment(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Float{
+    	return((x - a1) * (b2 - b1) + (b1 - y) * (a2-a1))/Math.sqrt((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1)); //wikipedia to the rescue
+    }
+
+    private static function projectiveCoordinate(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Float{
+    	return ((x-a1)*(a2-a1) + (y-b1)*(b2-b1))/((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1));
+    }
+
+    private static function projectiveCoordinateWithRect(x:Float, y:Float, rect:FlxSprite){
+    	var radAngle:Float = rect.angle * Math.PI / 180;
+		var centerX:Float = rect.x + rect.width/2;
+		var centerY:Float = rect.y + rect.height/2;
+		return projectiveCoordinate(x, y, centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2,
+			centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2);
+    }
+
 	private static function checkCollidePointAndSegment(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Bool{
-		var dist:Float = Math.abs(((x - a1) * (b2 - b1) + (b1 - y) * (a2-a1)))/Math.sqrt((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1)); //wikipedia to the rescue
-		var projectionCoord:Float = ((x-a1)*(a2-a1) + (y-b1)*(b2-b1))/((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1));
-		if(dist < COLLISION_THRESHOLD){
-			if(projectionCoord >= 0 && projectionCoord <= 1){
-				trace(dist + " " + projectionCoord + "\n");
-				return true;
-			}
-		}
-		return false;
+		var dist:Float = Math.abs(distanceFromPointToSegment(x,y,a1,b1,a2,b2)); //wikipedia to the rescue
+		var projectionCoord:Float = projectiveCoordinate(x,y,a1,b1,a2,b2);
+		return (dist < COLLISION_THRESHOLD) && (projectionCoord >= 0) && (projectionCoord <= 1);
 	}
 
 	private static function checkCollidePointAndRect(x:Float, y:Float, rect:FlxSprite){
