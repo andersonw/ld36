@@ -11,6 +11,8 @@ class PlayState extends FlxState
 {
 	override public function create():Void
 	{
+        var polygon:PolygonSprite = new PolygonSprite(200, 200, 9, 10);
+        add(polygon);
 		super.create();
 	}
 
