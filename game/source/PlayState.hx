@@ -124,10 +124,13 @@ class PlayState extends FlxState
                     if (!currentlyColliding)
                     {
                         currentlyColliding = true;
-                        xVelocities[0] *= -ELASTICITY;
-                        yVelocities[0] *= -ELASTICITY;
-                        xVelocities[1] *= -ELASTICITY;
-                        yVelocities[1] *= -ELASTICITY;
+                        var tmp:Float = xVelocities[0];
+                        xVelocities[0] = xVelocities[1];
+                        xVelocities[1] = tmp;
+
+                        tmp = yVelocities[0];
+                        yVelocities[0] = yVelocities[1];
+                        yVelocities[1] = tmp;
                     }
                     break;
                 }   
