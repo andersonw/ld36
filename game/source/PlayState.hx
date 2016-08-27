@@ -26,27 +26,28 @@ class PlayState extends FlxState
 	public static inline var VELOCITY:Float = 4;
 	public static inline var DRAG:Float = 0.99;
 
+	public function makeSprite(sprite:FlxSprite, keymap:Array<FlxKey>, xv:Int = 0, yv:Int = 0):Int
+	{
+		playSprites.push(sprite);
+		keyLists.push(keymap);
+		xVelocities.push(xv);
+		yVelocities.push(yv);
+		add(sprite);
+		return playSprites.length - 1;
+	}
+	
 	override public function create():Void
 	{
 		width = FlxG.width;
 		height = FlxG.height;
+
 		playSprites = new Array<FlxSprite>();
 		xVelocities = new Array<Float>();
 		yVelocities = new Array<Float>();
 		keyLists = new Array<Array<FlxKey>>();
 
-		playSprites.push(new PolygonSprite(25, 25, 3 + Math.floor(Math.random()*7), 10));
-		keyLists.push([W,A,S,D]);
-
-		playSprites.push(new PolygonSprite(400, 400, 2, 74));
-		keyLists.push([UP, LEFT, DOWN, RIGHT]);
-
-		for(sprite in playSprites)
-		{
-			add(sprite);
-			xVelocities.push(0);
-			yVelocities.push(0);
-		}
+		makeSprite(new PolygonSprite(25, 25, 3 + Math.floor(Math.random()*7), 10), [W, A, S, D]);
+		makeSprite(new PolygonSprite(400, 400, 2, 74), [UP, LEFT, DOWN, RIGHT]);
 		super.create();
 	}
 
