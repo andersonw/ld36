@@ -14,7 +14,7 @@ import flixel.input.keyboard.FlxKey;
 
 class PlayState extends FlxState
 {
-	var playSprites:Array<FlxSprite>;
+	var playSprites:Array<NewPolygonSprite>;
 	var xVelocities:Array<Float>;
 	var yVelocities:Array<Float>;
 	var keyLists:Array<Array<FlxKey>>;
@@ -30,7 +30,7 @@ class PlayState extends FlxState
 	public static inline var DRAG:Float = 0.99;
     public static inline var ELASTICITY:Float = .90;
 
-	public function makeSprite(sprite:FlxSprite, keymap:Array<FlxKey>, xv:Int = 0, yv:Int = 0):Int
+	public function makeSprite(sprite:NewPolygonSprite, keymap:Array<FlxKey>, xv:Int = 0, yv:Int = 0):Int
 	{
 		playSprites.push(sprite);
 		keyLists.push(keymap);
@@ -45,13 +45,13 @@ class PlayState extends FlxState
 		width = FlxG.width;
 		height = FlxG.height;
 
-		playSprites = new Array<FlxSprite>();
+		playSprites = new Array<NewPolygonSprite>();
 		xVelocities = new Array<Float>();
 		yVelocities = new Array<Float>();
 		keyLists = new Array<Array<FlxKey>>();
 
-		makeSprite(new PolygonSprite(25, 25, 3 + Math.floor(Math.random()*7), 10), [W, A, S, D]);
-		makeSprite(new PolygonSprite(400, 400, 3, 74), [UP, LEFT, DOWN, RIGHT]);
+		makeSprite(new NewPolygonSprite(25, 25, 3 + Math.floor(Math.random()*7), 10), [W, A, S, D]);
+		makeSprite(new NewPolygonSprite(400, 400, 3, 74), [UP, LEFT, DOWN, RIGHT]);
 		
         currentlyColliding = false;
 
@@ -63,7 +63,7 @@ class PlayState extends FlxState
         super.update(elapsed);
 
 		for(i in 0...playSprites.length){
-			var sprite:FlxSprite = playSprites[i];
+			var sprite:NewPolygonSprite = playSprites[i];
 			xVelocities[i] *= DRAG;
 			yVelocities[i] *= DRAG;
 			if(keyLists[i].length >= 4){
@@ -92,7 +92,7 @@ class PlayState extends FlxState
 			if(sprite.x > width && xVelocities[i] > 0) xVelocities[i] *= -1;
 			if(sprite.y < 0 && yVelocities[i] < 0) yVelocities[i] *= -1;
 			if(sprite.y > height && yVelocities[i] > 0) yVelocities[i] *= -1;
-			
+
 			sprite.x += xVelocities[i];
 			sprite.y += yVelocities[i];
 		}
@@ -101,8 +101,8 @@ class PlayState extends FlxState
 
     private function checkCollisions():Void
     {
-        var player1Segments:Array<FlxNestedSprite> = cast(playSprites[0], FlxNestedSprite).children;
-        var player2Segments:Array<FlxNestedSprite> = cast(playSprites[1], FlxNestedSprite).children;
+        var player1Segments:Array<FlxSprite> = playSprites[0].members;
+        var player2Segments:Array<FlxSprite> = playSprites[1].members;
         
         var superCollides = false;
         for (i in 0...player1Segments.length)
