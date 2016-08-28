@@ -17,7 +17,7 @@ class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
     var relativeX:Array<Float>;
 
 
-    public function new(centerX:Float, centerY:Float, numSides:Int, angle:Float):Void
+    public function new(centerX:Float, centerY:Float, numSides:Int, angle:Float, radius:Float = 100):Void
     {
         super();
 
@@ -26,6 +26,7 @@ class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
         this.x = centerX;
         this.y = centerY;
         this.angle = angle;
+        this.RADIUS = radius;
 
         var sideLength:Float = RADIUS * Math.sqrt(2*(1-Math.cos(2*Math.PI/numSides)));
         var interiorAngle:Float = Math.PI*(numSides-2)/numSides;
@@ -60,8 +61,8 @@ class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
 
         //deal with indicator
         var indicator:FlxSprite = members[0]; //Anderson likes explicit typing
-        indicator.x = x + RADIUS*(Math.cos(angle*Math.PI/180)-1)/2 - 2*Math.cos(angle*Math.PI/180);
-        indicator.y = y + RADIUS*Math.sin(angle*Math.PI/180)/2 - 2*Math.sin(angle*Math.PI/180);
+        indicator.x = x + RADIUS*(Math.cos(angle*Math.PI/180)-1)/2;
+        indicator.y = y + RADIUS*Math.sin(angle*Math.PI/180)/2 - 2;
         indicator.angle = angle;
 
         for(i in 1...members.length)

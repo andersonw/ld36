@@ -225,11 +225,6 @@ class BasicGameState extends FlxState
 
         var onSegment = Point.dot(Point.minus(p, p1), dif) / Point.dot(dif, dif);
         if(onSegment >= 0 && onSegment <= 1){
-            trace(currd, newd, onSegment, p.x, p.y, newp.x, newp.y);
-            trace(p1.x, p1.y);
-            trace(p2.x, p2.y);
-            trace(newp1.x, newp1.y);
-            trace(newp2.x, newp2.y);
             // 1088.11037239469,-155.058256960268,0.658473061964883
             // 7.30366411013711,123.808197889638 p
             // 7.30366411013711,123.808197889638 newp
