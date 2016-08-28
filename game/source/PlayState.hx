@@ -252,6 +252,7 @@ class PlayState extends FlxState
 		}
 
 		return false;
+	}
 
 
     private static function distanceFromPointToSegment(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Float{
