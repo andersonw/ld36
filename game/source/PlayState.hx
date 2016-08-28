@@ -32,6 +32,7 @@ class PlayState extends FlxState
 	public static inline var VELOCITY:Float = 4;
 	public static inline var DRAG:Float = 0.99;
     public static inline var ELASTICITY:Float = .90;
+    public static inline var ANGULAR_RECOIL:Float = -0.01;
 
     public static inline var COLLISION_THRESHOLD:Float = 10;
 
@@ -192,6 +193,17 @@ class PlayState extends FlxState
                     if (!currentlyColliding)
                     {
                         currentlyColliding = true;
+
+                        var pcoord:Float = projectiveCoordinateWithRect(p.x, p.y, rect);
+                        var collPoint:Point = pointAlongRectangle(rect, pcoord);
+
+                        var xRad:Float = collPoint.x - playSprites[b].x;
+                        var yRad:Float = collPoint.y - playSprites[b].y;
+                        var xVelDif:Float = xVelocities[a] - xVelocities[b];
+                        var yVelDif:Float = yVelocities[a] - yVelocities[b];
+
+                        aVelocities[b] += (xRad*yVelDif - yRad*xVelDif)*ANGULAR_RECOIL;
+
                         var tmp:Float = xVelocities[0];
                         xVelocities[0] = xVelocities[1];
                         xVelocities[1] = tmp;
@@ -199,6 +211,10 @@ class PlayState extends FlxState
                         tmp = yVelocities[0];
                         yVelocities[0] = yVelocities[1];
                         yVelocities[1] = tmp;
+
+
+
+
                     }
                     break;
                 }
@@ -230,18 +246,15 @@ class PlayState extends FlxState
 		// var c = a*p1.x + b*p1.b;
 
 		// var currd = a*p.x + b*p.y - c;
-		var currd = getDiscriminant(p, p1, p2);
+		var length:Float = Math.sqrt((p2.x-p1.x)*(p2.x-p1.x) + (p2.y-p1.y)*(p2.y-p1.y));
+		var currd = getDiscriminant(p, p1, p2)/(length);
 
-
-		// var newp = p.update(xVelocities[p.polyInd], yVelocities[p.polyInd]);
-		// var newp1 = p1.update(xVelocities[p1.polyInd], yVelocities[p1.polyInd]);
-		// var newp2 = p2.update(xVelocities[p2.polyInd], yVelocities[p2.polyInd]);
 		var newp = getUpdatedPoint(p);
 		var newp1 = getUpdatedPoint(p1);
 		var newp2 = getUpdatedPoint(p2);
 		var newd = getDiscriminant(newp, newp1, newp2);
 
-		if( currd * newd > 0)
+		if(currd * newd < 0);
 			return false;
 
 		var a1 = p1.x;
@@ -250,7 +263,7 @@ class PlayState extends FlxState
 		var b2 = p2.y;
 
 		var onSegment = ((p.x-a1)*(a2-a1) + (p.y-b1)*(b2-b1)) / ((a2-a1)*(a2-a1) + (b2-b1)*(b2-b1));
-		if(onSegment > 0 && onSegment < 1){
+		if(onSegment >= 0 && onSegment <= 1){
 			return true;
 		}
 
@@ -272,6 +285,17 @@ class PlayState extends FlxState
 		var centerY:Float = rect.y + rect.height/2;
 		return projectiveCoordinate(x, y, centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2,
 			centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2);
+    }
+
+    private static function averageOfPoints(p1:Point, p2:Point, alpha:Float = 0.5):Point{
+    	return new Point(p1.x * alpha + p2.x * (1-alpha), p1.y * alpha + p2.y * (1-alpha), p1.polyInd);
+    }
+
+    private static function pointAlongRectangle(rect:FlxSprite, alpha:Float = 0.5):Point{
+    	var radAngle:Float = rect.angle * Math.PI/180;
+    	return averageOfPoints(new Point(rect.x + rect.width/2 - rect.width*Math.cos(radAngle)/2, rect.y + rect.height/2 - rect.width*Math.sin(radAngle)/2,-1),
+			new Point(rect.x + rect.width/2 + rect.width*Math.cos(radAngle)/2, rect.y + rect.height/2 + rect.width*Math.sin(radAngle)/2,-1), alpha);
+
     }
 
 	// private static function checkCollidePointAndSegment(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Bool{
