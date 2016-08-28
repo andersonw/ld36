@@ -121,16 +121,7 @@ class BasicGameState extends FlxState
      //    if(setCurrentlyCollidingFalse)
      //     currentlyColliding = false;
 
-
-        var collided:Bool = collideSpriteAPointsWithSpriteBEdges(0,1);
-        if (!collided)
-        {
-            var collided2:Bool = collideSpriteAPointsWithSpriteBEdges(1,0);
-            if (!collided2)
-            {
-                currentlyColliding = false;
-            }
-        }
+        currentlyColliding = (collideSpriteAPointsWithSpriteBEdges(0,1) || collideSpriteAPointsWithSpriteBEdges(1,0)) && currentlyColliding;
     }
 
     //this function performs collisions (i.e. it will change velocities and stuff if things collide)
@@ -175,16 +166,20 @@ class BasicGameState extends FlxState
                         var pcoord:Float = projectiveCoordinateWithRect(p, rect);
                         var collPoint:Point = pointAlongRectangle(rect, pcoord);
 
-                        var xRad:Float = collPoint.x - playSprites[b].x;
-                        var yRad:Float = collPoint.y - playSprites[b].y;
-                        var xVelDif:Float = velocities[a].x - velocities[b].x;
-                        var yVelDif:Float = velocities[a].y - velocities[b].y;
+                        var aCenter:Point = new Point(playSprites[a].x, playSprites[a].y, a);
+                        var bCenter:Point = new Point(playSprites[b].x, playSprites[b].y, b);
 
-                        aVelocities[b] += (xRad*yVelDif - yRad*xVelDif)*ANGULAR_RECOIL;
+                        var aRad:Point = Point.minus(p, aCenter);
+                        var bRad:Point = Point.minus(collPoint, bCenter);
+                        var velDif:Point = Point.minus(velocities[a], velocities[b]);
+
+                        aVelocities[a] += Point.cross(velDif, aRad)*ANGULAR_RECOIL;
+                        aVelocities[b] -= Point.cross(velDif, bRad)*ANGULAR_RECOIL;
 
                         var tmp:Point = velocities[0];
                         velocities[0] = velocities[1];
                         velocities[1] = tmp;
+
                     }
                     break;
                 }
