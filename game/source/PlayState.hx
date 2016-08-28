@@ -111,29 +111,29 @@ class PlayState extends FlxState
 
     private function checkCollisions():Void
     {
-    	var setCurrentlyCollidingFalse = true;
+    	// var setCurrentlyCollidingFalse = true;
+
+     //    var collided:Bool = collideSpriteAPointsWithSpriteBEdges(0,1);
+     //    if(collided)
+     //    	setCurrentlyCollidingFalse = false;
+
+     //    var collided2:Bool = collideSpriteAPointsWithSpriteBEdges(1,0);
+     //    if(collided2)
+     //    	setCurrentlyCollidingFalse = false;
+
+     //    if(setCurrentlyCollidingFalse)
+     //    	currentlyColliding = false;
+
 
         var collided:Bool = collideSpriteAPointsWithSpriteBEdges(0,1);
-        if(collided)
-        	setCurrentlyCollidingFalse = false;
-
-        var collided2:Bool = collideSpriteAPointsWithSpriteBEdges(1,0);
-        if(collided2)
-        	setCurrentlyCollidingFalse = false;
-
-        if(setCurrentlyCollidingFalse)
-        	currentlyColliding = false;
-
-
-        // var collided:Bool = collideSpriteAPointsWithSpriteBEdges(0,1);
-        // if (!collided)
-        // {
-        //     var collided2:Bool = collideSpriteAPointsWithSpriteBEdges(1,0);
-        //     if (!collided2)
-        //     {
-        //         currentlyColliding = false;
-        //     }
-        // }
+        if (!collided)
+        {
+            var collided2:Bool = collideSpriteAPointsWithSpriteBEdges(1,0);
+            if (!collided2)
+            {
+                currentlyColliding = false;
+            }
+        }
     }
 
     //this function performs collisions (i.e. it will change velocities and stuff if things collide)
@@ -291,8 +291,8 @@ class PlayState extends FlxState
         newp.polyInd = i;
 
         // update by rotation
-
-        return newp; // newp.rotatedCW(playSprites[i].RADIUS, aVelocities[i])
+        var origin = new Point(playSprites[i].x, playSprites[i].y, i);
+        return newp.rotatedCW(origin, aVelocities[i]);
 	}
 
 	// private static function checkCollidePointAndRect(x:Float, y:Float, rect:FlxSprite){

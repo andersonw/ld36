@@ -42,10 +42,10 @@ class Point
         var c = Math.cos(Math.PI*degAngle/180);
         var s = Math.cos(Math.PI*degAngle/180);
 
-        var d = this; // this - origin
+        var d = minus(this, origin);
         var newd = new Point(d.x * c + d.y * s, d.x * s - d.y * c, polyInd);
 
-        return d; // d + origin
+        return plus(d, origin);
     }
 
     public function updateWithPoint(vel:Point):Point{
