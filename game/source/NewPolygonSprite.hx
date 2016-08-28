@@ -9,7 +9,7 @@ import flixel.group.FlxGroup;
 
 class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
 {
-    public var RADIUS;
+    public var RADIUS:Float;
     public var x:Float;
     public var y:Float;
     public var angle:Float;
