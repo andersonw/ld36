@@ -185,7 +185,7 @@ class PlayState extends FlxState
             {
                 // if (checkCollidePointAndRect(playerAEndpointsX[j], playerAEndpointsY[j], rect))
                 var p = new Point(playerAEndpointsX[j], playerAEndpointsY[j], a);
-                if (checkCollidePointAndRect(p, rect))
+                if (checkCollidePointAndRect(p, rect, b))
                 {
                     collides = true;
                     superCollides = true;
@@ -222,21 +222,29 @@ class PlayState extends FlxState
 	// 	return false;
 	// }
 
-	private function checkCollidePointAndSegment(p:Point, a1:Float, b1:Float, a2:Float, b2:Float):Bool{
+	private function checkCollidePointAndSegment(p:Point, p1:Point, p2:Point):Bool{
 		
-		// standard form
-		var a = b2-b1;
-		var b = a1-a2;
-		var c = a*a1 + b*b1;
+		// // standard form
+		// var a = p2.y - p1.y;
+		// var b = p1.x - p2.x;
+		// var c = a*p1.x + b*p1.b;
 
-		var currd = a*p.x + b*p.y - c;
+		// var currd = a*p.x + b*p.y - c;
+		var currd = getDiscriminant(p, p1, p2);
 
-		var newx = p.x + xVelocities[p.polyInd];
-		var newy = p.y + yVelocities[p.polyInd];
-		var newd = a*newx + b*newy - c;
+
+		var newp = p.update(xVelocities[p.polyInd], yVelocities[p.polyInd]);
+		var newp1 = p1.update(xVelocities[p1.polyInd], yVelocities[p1.polyInd]);
+		var newp2 = p2.update(xVelocities[p2.polyInd], yVelocities[p2.polyInd]);
+		var newd = getDiscriminant(newp, newp1, newp2);
 
 		if( currd * newd > 0)
 			return false;
+
+		var a1 = p1.x;
+		var a2 = p2.x;
+		var b1 = p1.y;
+		var b2 = p2.y;
 
 		var onSegment = ((p.x-a1)*(a2-a1) + (p.y-b1)*(b2-b1)) / ((a2-a1)*(a2-a1) + (b2-b1)*(b2-b1));
 		if(onSegment > 0 && onSegment < 1){
@@ -248,6 +256,14 @@ class PlayState extends FlxState
 
 	}
 
+	private static function getDiscriminant(p:Point, p1:Point, p2:Point):Float{
+		var a = p2.y - p1.y;
+		var b = p1.x - p2.x;
+		var c = a*p1.x + b*p1.y;
+
+		return a*p.x + b*p.y - c;
+	}
+
 	// private static function checkCollidePointAndRect(x:Float, y:Float, rect:FlxSprite){
 	// 	var radAngle:Float = rect.angle * Math.PI / 180;
 	// 	var centerX:Float = rect.x + rect.width/2;
@@ -256,12 +272,14 @@ class PlayState extends FlxState
 	// 		centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2);
 	// }
 
-	private function checkCollidePointAndRect(p:Point, rect:FlxSprite){
+	private function checkCollidePointAndRect(p:Point, rect:FlxSprite, rectIndex:Int){
 		var radAngle:Float = rect.angle * Math.PI / 180;
 		var centerX:Float = rect.x + rect.width/2;
 		var centerY:Float = rect.y + rect.height/2;
-		return checkCollidePointAndSegment(p, centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2,
-			centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2);
+
+		var p1 = new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, rectIndex);
+		var p2 = new Point(centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2, rectIndex);
+		return checkCollidePointAndSegment(p, p1, p2);
 	}
 
 	// private function checkCollisionsWithPoints():Void

@@ -13,8 +13,14 @@ class Point
         this.polyInd = ind;
     }
 
-    public function dot(q:Point){
+    public function dot(q:Point):Float{
         return this.x * q.x + this.y * q.y;
+    }
+
+    public function update(xvel:Float, yvel:Float):Point{
+        var newx = this.x + xvel;
+        var newy = this.y + yvel;
+        return new Point(newx, newy, this.polyInd);
     }
 
 }
