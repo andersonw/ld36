@@ -63,11 +63,11 @@ class Point
     }
 
     public static function dot(a:Point, b:Point):Float{
-        return a.x * b.x + a.y + b.y;
+        return a.x * b.x + a.y * b.y;
     }
 
     public static function cross(a:Point, b:Point):Float{
-        return a.x * b.y - a.y - b.x;
+        return a.x * b.y - a.y * b.x;
     }
 
     public static function polarPoint(r:Float, theta:Float):Point{
