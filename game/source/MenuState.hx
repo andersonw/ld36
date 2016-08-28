@@ -1,5 +1,6 @@
 package;
 
+import flixel.addons.ui.FlxButtonPlus;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
@@ -11,10 +12,15 @@ class MenuState extends FlxState
 {
 	override public function create():Void
 	{
-        add(new FlxText(10, 10, 100, "Hello, World!"));
-
+        var buttonTest = new FlxButtonPlus(270, 100, switchTest, "Test", 100, 20);
+        add(buttonTest);
 		super.create();
 	}
+
+    public function switchTest():Void
+    {
+        FlxG.switchState(new TestState());
+    }
 
 	override public function update(elapsed:Float):Void
 	{
