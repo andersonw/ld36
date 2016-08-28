@@ -174,8 +174,11 @@ class BasicGameState extends FlxState
                         var bRad:Point = Point.minus(collPoint, bCenter);
                         var velDif:Point = Point.minus(velocities[a], velocities[b]);
 
-                        aVelocities[a] += Point.cross(velDif, aRad)*ANGULAR_RECOIL;
-                        aVelocities[b] -= Point.cross(velDif, bRad)*ANGULAR_RECOIL;
+                        // aVelocities[a] += Point.cross(velDif, aRad)*ANGULAR_RECOIL;
+                        // aVelocities[b] -= Point.cross(velDif, bRad)*ANGULAR_RECOIL;
+                        var oldAngVelocityA = aVelocities[a];
+                        aVelocities[a] = - aVelocities[b];
+                        aVelocities[b] = -oldAngVelocityA;
 
                         var tmp:Point = velocities[0];
                         velocities[0] = velocities[1];
