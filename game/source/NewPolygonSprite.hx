@@ -17,10 +17,12 @@ class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
     var relativeX:Array<Float>;
 
 
-    public function new(centerX:Float, centerY:Float, numSides:Int, angle:Float):Void
+    public function new(centerX:Float, centerY:Float, numSides:Int, angle:Float, ?radius:Float):Void
     {
         super();
 
+        if (radius!=null)
+            RADIUS = radius;
         //makeGraphic(0,0);
         this.numSides = numSides;
         this.x = centerX;
