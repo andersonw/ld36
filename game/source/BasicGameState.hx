@@ -132,7 +132,7 @@ class BasicGameState extends FlxState
         
         var playerASides:Array<FlxSprite> = playSprites[a].members;
         var playerBSides:Array<FlxSprite> = playSprites[b].members;
-        
+        var playerBColor:FlxColor = playSprites[b].color;
         // get A endppoints
         var playerAEndpoints:Array<Point> = new Array<Point>();
         for (i in 0...playerASides.length)
@@ -185,7 +185,7 @@ class BasicGameState extends FlxState
                     break;
                 }
             }
-            rect.color = collides ? FlxColor.RED : FlxColor.WHITE;
+            rect.color = collides ? FlxColor.RED : playerBColor;
         }
 
         return superCollides;

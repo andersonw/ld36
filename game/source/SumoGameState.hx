@@ -27,8 +27,13 @@ class SumoGameState extends BasicGameState
         gameFieldOutline.makeGraphic(cast width-2*gameFieldXMargin+4, cast height-2*gameFieldYMargin+4, FlxColor.WHITE);
         gameField.makeGraphic(cast width-2*gameFieldXMargin, cast height-2*gameFieldYMargin, FlxColor.BLACK);
 
-        makeSprite(new NewPolygonSprite(110, 240, Registry.player1Sides, 0, 50), [W, A, S, D]);
-        makeSprite(new NewPolygonSprite(530, 240, Registry.player2Sides, 180, 50), [UP, LEFT, DOWN, RIGHT]);
+        addSprites();
+    }
+
+    public function addSprites():Void
+    {
+        makeSprite(new NewPolygonSprite(110, 240, Registry.player1Sides, 0, 50, FlxColor.GREEN), [W, A, S, D]);
+        makeSprite(new NewPolygonSprite(530, 240, Registry.player2Sides, 180, 50, FlxColor.YELLOW), [UP, LEFT, DOWN, RIGHT]);
     }
 
     override public function update(elapsed:Float):Void
@@ -38,11 +43,13 @@ class SumoGameState extends BasicGameState
         if (isPlayerDead(0))
         {
             trace("Player 2 wins!");
+            Registry.player2Sides += 1;
             resetGame();
         }
         else if (isPlayerDead(1))
         {
             trace("Player 1 wins!");
+            Registry.player1Sides += 1;
             resetGame();
         }
     }
@@ -70,7 +77,6 @@ class SumoGameState extends BasicGameState
         velocities = new Array<Point>();
         aVelocities = new Array<Float>();
         keyLists = new Array<Array<FlxKey>>();
-        makeSprite(new NewPolygonSprite(110, 240, Registry.player1Sides, 0, 50), [W, A, S, D]);
-        makeSprite(new NewPolygonSprite(530, 240, Registry.player2Sides, 180, 50), [UP, LEFT, DOWN, RIGHT]);
+        addSprites();
     }
 }
