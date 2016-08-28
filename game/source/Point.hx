@@ -23,4 +23,15 @@ class Point
         return new Point(newx, newy, this.polyInd);
     }
 
+    public function rotatedCW(origin:Point, degAngle:Float){
+        
+        var c = Math.cos(Math.PI*degAngle/180);
+        var s = Math.cos(Math.PI*degAngle/180);
+
+        var d = this; // this - origin
+        var newd = new Point(d.x * c + d.y * s, d.x * s - d.y * c, polyInd);
+
+        return d; // d + origin
+    }
+
 }

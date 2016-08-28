@@ -95,11 +95,11 @@ class PlayState extends FlxState
 			if(keyLists[i].length >= 4){
 				if(FlxG.keys.anyPressed([keyLists[i][1]]))
 				{
-					aVelocities[i] -= ANGULAR_ACCELERATION * 60 * elapsed;
+					aVelocities[i] -= ANGULAR_ACCELERATION * 60 * elapsed; // left
 				}
 				if(FlxG.keys.anyPressed([keyLists[i][3]]))
 				{
-					aVelocities[i] += ANGULAR_ACCELERATION * 60 * elapsed;
+					aVelocities[i] += ANGULAR_ACCELERATION * 60 * elapsed; // right
 				}
 				if(FlxG.keys.anyPressed([keyLists[i][0]]))
 				{
@@ -233,9 +233,12 @@ class PlayState extends FlxState
 		var currd = getDiscriminant(p, p1, p2);
 
 
-		var newp = p.update(xVelocities[p.polyInd], yVelocities[p.polyInd]);
-		var newp1 = p1.update(xVelocities[p1.polyInd], yVelocities[p1.polyInd]);
-		var newp2 = p2.update(xVelocities[p2.polyInd], yVelocities[p2.polyInd]);
+		// var newp = p.update(xVelocities[p.polyInd], yVelocities[p.polyInd]);
+		// var newp1 = p1.update(xVelocities[p1.polyInd], yVelocities[p1.polyInd]);
+		// var newp2 = p2.update(xVelocities[p2.polyInd], yVelocities[p2.polyInd]);
+		var newp = getUpdatedPoint(p);
+		var newp1 = getUpdatedPoint(p1);
+		var newp2 = getUpdatedPoint(p2);
 		var newd = getDiscriminant(newp, newp1, newp2);
 
 		if( currd * newd > 0)
@@ -283,6 +286,20 @@ class PlayState extends FlxState
 		var c = a*p1.x + b*p1.y;
 
 		return a*p.x + b*p.y - c;
+	}
+
+	private function getUpdatedPoint(p:Point):Point{
+
+		var i = p.polyInd;
+
+		// update by velocity
+		var newx = p.x + xVelocities[i];
+        var newy = p.y + yVelocities[i];
+        var newp = new Point(newx, newy, i);
+
+        // update by rotation
+
+        return newp; // newp.rotatedCW(playSprites[i].RADIUS, aVelocities[i])
 	}
 
 	// private static function checkCollidePointAndRect(x:Float, y:Float, rect:FlxSprite){
