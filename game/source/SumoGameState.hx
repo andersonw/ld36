@@ -36,16 +36,13 @@ class SumoGameState extends BasicGameState
         countdownText = new FlxText();
         countdownText.setFormat(20);
         add(countdownText);
-        countdownText.visible = true;
-
-        timeToGameStart = 3;
-        gameStarted = false;
+        resetCountdown();
     }
 
     public function addSprites():Void
     {
-        makeSprite(new NewPolygonSprite(110, 240, Registry.player1Sides, 0, 50, FlxColor.GREEN), [W, A, S, D]);
-        makeSprite(new NewPolygonSprite(530, 240, Registry.player2Sides, 180, 50, FlxColor.YELLOW), [UP, LEFT, DOWN, RIGHT]);
+        makeSprite(new NewPolygonSprite(110, 240, Registry.player1Sides, 0, 50, FlxColor.YELLOW), [W, A, S, D]);
+        makeSprite(new NewPolygonSprite(530, 240, Registry.player2Sides, 180, 50, FlxColor.GREEN), [UP, LEFT, DOWN, RIGHT]);
     }
 
     override public function update(elapsed:Float):Void
@@ -107,12 +104,19 @@ class SumoGameState extends BasicGameState
         aVelocities = new Array<Float>();
         keyLists = new Array<Array<FlxKey>>();
         addSprites();
+        resetCountdown();
+    }
+
+    public function resetCountdown():Void
+    {
+        countdownText.visible = true;
+        timeToGameStart = 3;
+        gameStarted = false;
     }
 
     public function updateCountdownText():Void
     {
         countdownText.text = Std.string(Math.ceil(timeToGameStart));
-        trace(countdownText.text);
         countdownText.x = (width-countdownText.width)/2;
         countdownText.y = (height-countdownText.height)/2;
     }
