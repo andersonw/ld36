@@ -15,8 +15,7 @@ import flixel.input.keyboard.FlxKey;
 class PlayState extends FlxState
 {
 	var playSprites:Array<NewPolygonSprite>;
-	var xVelocities:Array<Float>;
-	var yVelocities:Array<Float>;
+	var velocities:Array<Point>;
 	var aVelocities:Array<Float>;
 	var keyLists:Array<Array<FlxKey>>;
 
@@ -26,22 +25,20 @@ class PlayState extends FlxState
     var currentlyColliding:Bool;
 
 	public static inline var ACCELERATION:Float = 0.2;
-	public static inline var ANGULAR_ACCELERATION:Float = 1;
-	public static inline var ANGULAR_DRAG:Float = 0.85;
+	public static inline var ANGULAR_ACCELERATION:Float = 0.4;
+	public static inline var ANGULAR_DRAG:Float = 0.96;
 	public static inline var ANGULAR_VELOCITY:Float = 5;
 	public static inline var VELOCITY:Float = 4;
 	public static inline var DRAG:Float = 0.99;
     public static inline var ELASTICITY:Float = .90;
     public static inline var ANGULAR_RECOIL:Float = -0.01;
-
     public static inline var COLLISION_THRESHOLD:Float = 10;
 
 	public function makeSprite(sprite:NewPolygonSprite, keymap:Array<FlxKey>, xv:Float = 0, yv:Float = 0, av:Float = 0):Int
 	{
 		playSprites.push(sprite);
 		keyLists.push(keymap);
-		xVelocities.push(xv);
-		yVelocities.push(yv);
+		velocities.push(new Point(xv, yv, -1));
 		aVelocities.push(av);
 		add(sprite);
 		return playSprites.length - 1;
@@ -53,8 +50,7 @@ class PlayState extends FlxState
 		height = FlxG.height;
 
 		playSprites = new Array<NewPolygonSprite>();
-		xVelocities = new Array<Float>();
-		yVelocities = new Array<Float>();
+		velocities = new Array<Point>();
 		aVelocities = new Array<Float>();
 		keyLists = new Array<Array<FlxKey>>();
 
@@ -83,43 +79,30 @@ class PlayState extends FlxState
 			var sprite:NewPolygonSprite = playSprites[i];
 
 			// apply velocities
-			sprite.x += xVelocities[i] * 60 * elapsed;
-			sprite.y += yVelocities[i] * 60 * elapsed;
+			sprite.x += velocities[i].x * 60 * elapsed;
+			sprite.y += velocities[i].y * 60 * elapsed;
 			sprite.angle += aVelocities[i] * 60 * elapsed;
 			
 			// apply drags
-			xVelocities[i] *= DRAG;
-			yVelocities[i] *= DRAG;
+			velocities[i].x *= DRAG;
+			velocities[i].y *= DRAG;
 			aVelocities[i] *= ANGULAR_DRAG;
 
 			// check key for accelerations
 			if(keyLists[i].length >= 4){
-				if(FlxG.keys.anyPressed([keyLists[i][1]]))
-				{
-					aVelocities[i] -= ANGULAR_ACCELERATION * 60 * elapsed; // left
-				}
-				if(FlxG.keys.anyPressed([keyLists[i][3]]))
-				{
-					aVelocities[i] += ANGULAR_ACCELERATION * 60 * elapsed; // right
-				}
+				if(FlxG.keys.anyPressed([keyLists[i][1]])) aVelocities[i] -= ANGULAR_ACCELERATION * 60 * elapsed;
+				if(FlxG.keys.anyPressed([keyLists[i][3]])) aVelocities[i] += ANGULAR_ACCELERATION * 60 * elapsed;
 				if(FlxG.keys.anyPressed([keyLists[i][0]]))
-				{
-					xVelocities[i] += ACCELERATION * Math.cos(Math.PI*sprite.angle/180) * 60 * elapsed;
-					yVelocities[i] += ACCELERATION * Math.sin(Math.PI*sprite.angle/180) * 60 * elapsed;
-
-				}
+					velocities[i].add(Point.polarPoint(ACCELERATION * 60 * elapsed, Math.PI*sprite.angle/180));
 				if(FlxG.keys.anyPressed([keyLists[i][2]]))
-				{
-					xVelocities[i] -= ACCELERATION * Math.cos(Math.PI*sprite.angle/180) * 60 * elapsed;
-					yVelocities[i] -= ACCELERATION * Math.sin(Math.PI*sprite.angle/180) * 60 * elapsed;
-				}
+					velocities[i].subtract(Point.polarPoint(ACCELERATION * 60 * elapsed, Math.PI*sprite.angle/180));
 			}
 
 			// keep sprites within bounds
-			if(sprite.x < 0 && xVelocities[i] < 0) xVelocities[i] *= -1;
-			if(sprite.x > width && xVelocities[i] > 0) xVelocities[i] *= -1;
-			if(sprite.y < 0 && yVelocities[i] < 0) yVelocities[i] *= -1;
-			if(sprite.y > height && yVelocities[i] > 0) yVelocities[i] *= -1;
+			if(sprite.x < 0 && velocities[i].x < 0) velocities[i].x *= -1;
+			if(sprite.x > width && velocities[i].x > 0) velocities[i].x *= -1;
+			if(sprite.y < 0 && velocities[i].y < 0) velocities[i].y *= -1;
+			if(sprite.y > height && velocities[i].y > 0) velocities[i].y *= -1;
 
 		}
         checkCollisions();
@@ -162,8 +145,7 @@ class PlayState extends FlxState
         var playerBSides:Array<FlxSprite> = playSprites[b].members;
         
         // get A endppoints
-        var playerAEndpointsX:Array<Float> = new Array<Float>();
-        var playerAEndpointsY:Array<Float> = new Array<Float>();
+        var playerAEndpoints:Array<Point> = new Array<Point>();
         for (i in 0...playerASides.length)
         {
             var rect:FlxSprite = playerASides[i];
@@ -171,8 +153,7 @@ class PlayState extends FlxState
             var centerX:Float = rect.x + rect.width/2;
             var centerY:Float = rect.y + rect.height/2;
             //gets the "left" endpoint of the rectangle
-            playerAEndpointsX.push(centerX - rect.width*Math.cos(radAngle)/2);
-            playerAEndpointsY.push(centerY - rect.width*Math.sin(radAngle)/2);
+            playerAEndpoints.push(new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, a));
         }
 
         var superCollides:Bool = false;
@@ -185,7 +166,7 @@ class PlayState extends FlxState
             for (j in 0...playerASides.length)
             {
                 // if (checkCollidePointAndRect(playerAEndpointsX[j], playerAEndpointsY[j], rect))
-                var p = new Point(playerAEndpointsX[j], playerAEndpointsY[j], a);
+                var p = playerAEndpoints[j];
                 if (checkCollidePointAndRect(p, rect, b))
                 {
                     collides = true;
@@ -194,27 +175,19 @@ class PlayState extends FlxState
                     {
                         currentlyColliding = true;
 
-                        var pcoord:Float = projectiveCoordinateWithRect(p.x, p.y, rect);
+                        var pcoord:Float = projectiveCoordinateWithRect(p, rect);
                         var collPoint:Point = pointAlongRectangle(rect, pcoord);
 
                         var xRad:Float = collPoint.x - playSprites[b].x;
                         var yRad:Float = collPoint.y - playSprites[b].y;
-                        var xVelDif:Float = xVelocities[a] - xVelocities[b];
-                        var yVelDif:Float = yVelocities[a] - yVelocities[b];
+                        var xVelDif:Float = velocities[a].x - velocities[b].x;
+                        var yVelDif:Float = velocities[a].y - velocities[b].y;
 
                         aVelocities[b] += (xRad*yVelDif - yRad*xVelDif)*ANGULAR_RECOIL;
 
-                        var tmp:Float = xVelocities[0];
-                        xVelocities[0] = xVelocities[1];
-                        xVelocities[1] = tmp;
-
-                        tmp = yVelocities[0];
-                        yVelocities[0] = yVelocities[1];
-                        yVelocities[1] = tmp;
-
-
-
-
+                        var tmp:Point = velocities[0];
+                        velocities[0] = velocities[1];
+                        velocities[1] = tmp;
                     }
                     break;
                 }
@@ -246,24 +219,21 @@ class PlayState extends FlxState
 		// var c = a*p1.x + b*p1.b;
 
 		// var currd = a*p.x + b*p.y - c;
-		var length:Float = Math.sqrt((p2.x-p1.x)*(p2.x-p1.x) + (p2.y-p1.y)*(p2.y-p1.y));
-		var currd = getDiscriminant(p, p1, p2)/(length);
+		var currd = getDiscriminant(p, p1, p2);
 
 		var newp = getUpdatedPoint(p);
 		var newp1 = getUpdatedPoint(p1);
 		var newp2 = getUpdatedPoint(p2);
 		var newd = getDiscriminant(newp, newp1, newp2);
 
-		if(currd * newd < 0);
+		if(currd * newd > 0)
 			return false;
 
-		var a1 = p1.x;
-		var a2 = p2.x;
-		var b1 = p1.y;
-		var b2 = p2.y;
+		var dif:Point = Point.minus(p2, p1);
 
-		var onSegment = ((p.x-a1)*(a2-a1) + (p.y-b1)*(b2-b1)) / ((a2-a1)*(a2-a1) + (b2-b1)*(b2-b1));
+		var onSegment = Point.dot(Point.minus(p, p1), dif) / Point.dot(dif, dif);
 		if(onSegment >= 0 && onSegment <= 1){
+			trace(currd, newd, onSegment);
 			return true;
 		}
 
@@ -279,11 +249,11 @@ class PlayState extends FlxState
     	return ((x-a1)*(a2-a1) + (y-b1)*(b2-b1))/((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1));
     }
 
-    private static function projectiveCoordinateWithRect(x:Float, y:Float, rect:FlxSprite){
+    private static function projectiveCoordinateWithRect(p:Point, rect:FlxSprite){
     	var radAngle:Float = rect.angle * Math.PI / 180;
 		var centerX:Float = rect.x + rect.width/2;
 		var centerY:Float = rect.y + rect.height/2;
-		return projectiveCoordinate(x, y, centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2,
+		return projectiveCoordinate(p.x, p.y, centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2,
 			centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2);
     }
 
@@ -317,9 +287,8 @@ class PlayState extends FlxState
 		var i = p.polyInd;
 
 		// update by velocity
-		var newx = p.x + xVelocities[i];
-        var newy = p.y + yVelocities[i];
-        var newp = new Point(newx, newy, i);
+		var newp:Point = Point.plus(p, velocities[i]);
+        newp.polyInd = i;
 
         // update by rotation
 
