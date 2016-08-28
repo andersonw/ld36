@@ -79,6 +79,7 @@ class BasicGameState extends FlxState
             sprite.x += velocities[i].x * 60 * elapsed;
             sprite.y += velocities[i].y * 60 * elapsed;
             sprite.angle += aVelocities[i] * 60 * elapsed;
+            // trace(aVelocities[i]);
             
             // apply drags
             velocities[i].x *= DRAG;
@@ -205,18 +206,25 @@ class BasicGameState extends FlxState
 
     private function checkCollidePointAndSegment(p:Point, p1:Point, p2:Point):Bool{
         
-        // // standard form
-        // var a = p2.y - p1.y;
-        // var b = p1.x - p2.x;
-        // var c = a*p1.x + b*p1.b;
-
-        // var currd = a*p.x + b*p.y - c;
         var currd = getDiscriminant(p, p1, p2);
 
         var newp = getUpdatedPoint(p);
         var newp1 = getUpdatedPoint(p1);
         var newp2 = getUpdatedPoint(p2);
         var newd = getDiscriminant(newp, newp1, newp2);
+
+        if(aVelocities[1] > 5){
+            trace('begin');
+            trace(aVelocities[1]);
+            // trace(distanceFromPointToSegment(p.x, p.y, p1.x, p1.y, p2.x, p2.y));
+            trace(currd, newd);
+            trace(p.x, p.y);
+            trace(newp.x, newp.y);
+            // trace(p1.x, p1.y);
+            // trace(p2.x, p2.y);
+            // trace(newp1.x, newp1.y);
+            // trace(newp2.x, newp2.y);
+        }
 
         if(currd * newd > 0)
             return false;
@@ -225,11 +233,7 @@ class BasicGameState extends FlxState
 
         var onSegment = Point.dot(Point.minus(p, p1), dif) / Point.dot(dif, dif);
         if(onSegment >= 0 && onSegment <= 1){
-            trace(currd, newd, onSegment, p.x, p.y, newp.x, newp.y);
-            trace(p1.x, p1.y);
-            trace(p2.x, p2.y);
-            trace(newp1.x, newp1.y);
-            trace(newp2.x, newp2.y);
+            
             // 1088.11037239469,-155.058256960268,0.658473061964883
             // 7.30366411013711,123.808197889638 p
             // 7.30366411013711,123.808197889638 newp

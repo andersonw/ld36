@@ -40,12 +40,12 @@ class Point
     public function rotatedCW(origin:Point, degAngle:Float){
         
         var c = Math.cos(Math.PI*degAngle/180);
-        var s = Math.cos(Math.PI*degAngle/180);
+        var s = Math.sin(Math.PI*degAngle/180);
 
         var d = minus(this, origin);
-        var newd = new Point(d.x * c + d.y * s, d.x * s - d.y * c, polyInd);
+        var newd = new Point(d.x * c - d.y * s, d.x * s + d.y * c, polyInd);
 
-        return plus(d, origin);
+        return plus(newd, origin);
     }
 
     public function updateWithPoint(vel:Point):Point{
