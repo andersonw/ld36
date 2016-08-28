@@ -266,6 +266,28 @@ class BasicGameState extends FlxState
         return((x - a1) * (b2 - b1) + (b1 - y) * (a2-a1))/Math.sqrt((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1)); //wikipedia to the rescue
     }
 
+    private static function distanceFromPointToRectLine(p:Point, rect:FlxSprite){
+        var radAngle:Float = rect.angle * Math.PI / 180;
+        var centerX:Float = rect.x + rect.width/2;
+        var centerY:Float = rect.y + rect.height/2;
+        return distanceFromPointToSegment(p.x, p.y, centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2,
+            centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2);
+    }
+
+    private static function distanceFromPointToRect(p:Point, rect:FlxSprite):Float{
+        var projCoord = projectiveCoordinateWithRect(p, rect);
+        var radAngle:Float = rect.angle * Math.PI / 180;
+        var centerX:Float = rect.x + rect.width/2;
+        var centerY:Float = rect.y + rect.height/2;
+        var nearSide:Point = new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2);
+        var farSide:Point = new Point(centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2);
+        if(projCoord > 0 && projCoord < 1)
+            return Math.abs(distanceFromPointToSegment(p.x, p.y, nearSide.x, nearSide.y, farSide.x, farSide.y));
+        var nearSideDif = Point.minus(p, nearSide);
+        var farSideDif = Point.minus(p, farSide);
+        return Math.min(Math.sqrt(Point.dot(nearSideDif,nearSideDif)), Math.sqrt(Point.dot(farSideDif,farSideDif)));
+    }
+
     private static function projectiveCoordinate(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Float{
         return ((x-a1)*(a2-a1) + (y-b1)*(b2-b1))/((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1));
     }
