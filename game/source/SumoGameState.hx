@@ -2,6 +2,7 @@ package;
 
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.text.FlxText;
 import flixel.input.keyboard.FlxKey;
 import flixel.util.FlxColor;
 
@@ -14,11 +15,14 @@ class SumoGameState extends BasicGameState
     var gameField:FlxSprite;
     var gameFieldOutline:FlxSprite;
 
+    var countdownText:FlxText;
+    var timeToGameStart:Float;
+    var gameStarted:Bool;
+
     override public function create():Void
     {
         gameField = new FlxSprite(gameFieldXMargin, gameFieldYMargin);
         gameFieldOutline = new FlxSprite(gameFieldXMargin-2, gameFieldYMargin-2);
-
         add(gameFieldOutline);
         add(gameField);
         //creating now so width and height get defined
@@ -28,6 +32,14 @@ class SumoGameState extends BasicGameState
         gameField.makeGraphic(cast width-2*gameFieldXMargin, cast height-2*gameFieldYMargin, FlxColor.BLACK);
 
         addSprites();
+
+        countdownText = new FlxText();
+        countdownText.setFormat(20);
+        add(countdownText);
+        countdownText.visible = true;
+
+        timeToGameStart = 3;
+        gameStarted = false;
     }
 
     public function addSprites():Void
@@ -39,6 +51,23 @@ class SumoGameState extends BasicGameState
     override public function update(elapsed:Float):Void
     {
         super.update(elapsed);
+
+        if (!gameStarted)
+        {
+            pause();
+            timeToGameStart -= elapsed;
+            if (timeToGameStart>0)
+            {
+                updateCountdownText();
+            }
+            else
+            {
+                gameStarted = true;
+                countdownText.visible = false;
+                unpause();
+            }
+            return;
+        }  
 
         if (isPlayerDead(0))
         {
@@ -78,5 +107,13 @@ class SumoGameState extends BasicGameState
         aVelocities = new Array<Float>();
         keyLists = new Array<Array<FlxKey>>();
         addSprites();
+    }
+
+    public function updateCountdownText():Void
+    {
+        countdownText.text = Std.string(Math.ceil(timeToGameStart));
+        trace(countdownText.text);
+        countdownText.x = (width-countdownText.width)/2;
+        countdownText.y = (height-countdownText.height)/2;
     }
 }
