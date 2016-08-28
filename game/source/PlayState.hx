@@ -15,8 +15,7 @@ import flixel.input.keyboard.FlxKey;
 class PlayState extends FlxState
 {
 	var playSprites:Array<NewPolygonSprite>;
-	var xVelocities:Array<Float>;
-	var yVelocities:Array<Float>;
+	var velocities:Array<Point>;
 	var aVelocities:Array<Float>;
 	var keyLists:Array<Array<FlxKey>>;
 
@@ -32,15 +31,13 @@ class PlayState extends FlxState
 	public static inline var VELOCITY:Float = 4;
 	public static inline var DRAG:Float = 0.99;
     public static inline var ELASTICITY:Float = .90;
-
     public static inline var COLLISION_THRESHOLD:Float = 10;
 
 	public function makeSprite(sprite:NewPolygonSprite, keymap:Array<FlxKey>, xv:Float = 0, yv:Float = 0, av:Float = 0):Int
 	{
 		playSprites.push(sprite);
 		keyLists.push(keymap);
-		xVelocities.push(xv);
-		yVelocities.push(yv);
+		velocities.push(new Point(xv, yv, -1));
 		aVelocities.push(av);
 		add(sprite);
 		return playSprites.length - 1;
@@ -52,8 +49,7 @@ class PlayState extends FlxState
 		height = FlxG.height;
 
 		playSprites = new Array<NewPolygonSprite>();
-		xVelocities = new Array<Float>();
-		yVelocities = new Array<Float>();
+		velocities = new Array<Point>();
 		aVelocities = new Array<Float>();
 		keyLists = new Array<Array<FlxKey>>();
 
@@ -82,43 +78,30 @@ class PlayState extends FlxState
 			var sprite:NewPolygonSprite = playSprites[i];
 
 			// apply velocities
-			sprite.x += xVelocities[i] * 60 * elapsed;
-			sprite.y += yVelocities[i] * 60 * elapsed;
+			sprite.x += velocities[i].x * 60 * elapsed;
+			sprite.y += velocities[i].y * 60 * elapsed;
 			sprite.angle += aVelocities[i] * 60 * elapsed;
 			
 			// apply drags
-			xVelocities[i] *= DRAG;
-			yVelocities[i] *= DRAG;
+			velocities[i].x *= DRAG;
+			velocities[i].y *= DRAG;
 			aVelocities[i] *= ANGULAR_DRAG;
 
 			// check key for accelerations
 			if(keyLists[i].length >= 4){
-				if(FlxG.keys.anyPressed([keyLists[i][1]]))
-				{
-					aVelocities[i] -= ANGULAR_ACCELERATION * 60 * elapsed;
-				}
-				if(FlxG.keys.anyPressed([keyLists[i][3]]))
-				{
-					aVelocities[i] += ANGULAR_ACCELERATION * 60 * elapsed;
-				}
+				if(FlxG.keys.anyPressed([keyLists[i][1]])) aVelocities[i] -= ANGULAR_ACCELERATION * 60 * elapsed;
+				if(FlxG.keys.anyPressed([keyLists[i][3]])) aVelocities[i] += ANGULAR_ACCELERATION * 60 * elapsed;
 				if(FlxG.keys.anyPressed([keyLists[i][0]]))
-				{
-					xVelocities[i] += ACCELERATION * Math.cos(Math.PI*sprite.angle/180) * 60 * elapsed;
-					yVelocities[i] += ACCELERATION * Math.sin(Math.PI*sprite.angle/180) * 60 * elapsed;
-
-				}
+					velocities[i].add(Point.polarPoint(ACCELERATION * 60 * elapsed, Math.PI*sprite.angle/180));
 				if(FlxG.keys.anyPressed([keyLists[i][2]]))
-				{
-					xVelocities[i] -= ACCELERATION * Math.cos(Math.PI*sprite.angle/180) * 60 * elapsed;
-					yVelocities[i] -= ACCELERATION * Math.sin(Math.PI*sprite.angle/180) * 60 * elapsed;
-				}
+					velocities[i].subtract(Point.polarPoint(ACCELERATION * 60 * elapsed, Math.PI*sprite.angle/180));
 			}
 
 			// keep sprites within bounds
-			if(sprite.x < 0 && xVelocities[i] < 0) xVelocities[i] *= -1;
-			if(sprite.x > width && xVelocities[i] > 0) xVelocities[i] *= -1;
-			if(sprite.y < 0 && yVelocities[i] < 0) yVelocities[i] *= -1;
-			if(sprite.y > height && yVelocities[i] > 0) yVelocities[i] *= -1;
+			if(sprite.x < 0 && velocities[i].x < 0) velocities[i].x *= -1;
+			if(sprite.x > width && velocities[i].x > 0) velocities[i].x *= -1;
+			if(sprite.y < 0 && velocities[i].y < 0) velocities[i].y *= -1;
+			if(sprite.y > height && velocities[i].y > 0) velocities[i].y *= -1;
 
 		}
         checkCollisions();
@@ -161,8 +144,7 @@ class PlayState extends FlxState
         var playerBSides:Array<FlxSprite> = playSprites[b].members;
         
         // get A endppoints
-        var playerAEndpointsX:Array<Float> = new Array<Float>();
-        var playerAEndpointsY:Array<Float> = new Array<Float>();
+        var playerAEndpoints:Array<Point> = new Array<Point>();
         for (i in 0...playerASides.length)
         {
             var rect:FlxSprite = playerASides[i];
@@ -170,8 +152,7 @@ class PlayState extends FlxState
             var centerX:Float = rect.x + rect.width/2;
             var centerY:Float = rect.y + rect.height/2;
             //gets the "left" endpoint of the rectangle
-            playerAEndpointsX.push(centerX - rect.width*Math.cos(radAngle)/2);
-            playerAEndpointsY.push(centerY - rect.width*Math.sin(radAngle)/2);
+            playerAEndpoints.push(new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, a));
         }
 
         var superCollides:Bool = false;
@@ -184,7 +165,7 @@ class PlayState extends FlxState
             for (j in 0...playerASides.length)
             {
                 // if (checkCollidePointAndRect(playerAEndpointsX[j], playerAEndpointsY[j], rect))
-                var p = new Point(playerAEndpointsX[j], playerAEndpointsY[j], a);
+                var p = playerAEndpoints[j];
                 if (checkCollidePointAndRect(p, rect, b))
                 {
                     collides = true;
@@ -192,13 +173,9 @@ class PlayState extends FlxState
                     if (!currentlyColliding)
                     {
                         currentlyColliding = true;
-                        var tmp:Float = xVelocities[0];
-                        xVelocities[0] = xVelocities[1];
-                        xVelocities[1] = tmp;
-
-                        tmp = yVelocities[0];
-                        yVelocities[0] = yVelocities[1];
-                        yVelocities[1] = tmp;
+                        var tmp:Point = velocities[0];
+                        velocities[0] = velocities[1];
+                        velocities[1] = tmp;
                     }
                     break;
                 }
@@ -231,22 +208,17 @@ class PlayState extends FlxState
 
 		// var currd = a*p.x + b*p.y - c;
 		var currd = getDiscriminant(p, p1, p2);
-
-
-		var newp = p.update(xVelocities[p.polyInd], yVelocities[p.polyInd]);
-		var newp1 = p1.update(xVelocities[p1.polyInd], yVelocities[p1.polyInd]);
-		var newp2 = p2.update(xVelocities[p2.polyInd], yVelocities[p2.polyInd]);
+		var newp = p.updateWithPoint(velocities[p.polyInd]);
+		var newp1 = p1.updateWithPoint(velocities[p1.polyInd]);
+		var newp2 = p2.updateWithPoint(velocities[p2.polyInd]);
 		var newd = getDiscriminant(newp, newp1, newp2);
 
 		if( currd * newd > 0)
 			return false;
 
-		var a1 = p1.x;
-		var a2 = p2.x;
-		var b1 = p1.y;
-		var b2 = p2.y;
+		var dif:Point = Point.minus(p2, p1);
 
-		var onSegment = ((p.x-a1)*(a2-a1) + (p.y-b1)*(b2-b1)) / ((a2-a1)*(a2-a1) + (b2-b1)*(b2-b1));
+		var onSegment = Point.dot(Point.minus(p, p1), dif) / Point.dot(dif, dif);
 		if(onSegment > 0 && onSegment < 1){
 			return true;
 		}
