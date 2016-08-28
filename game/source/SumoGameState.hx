@@ -2,6 +2,7 @@ package;
 
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.text.FlxText;
 import flixel.input.keyboard.FlxKey;
 import flixel.util.FlxColor;
 
@@ -14,11 +15,14 @@ class SumoGameState extends BasicGameState
     var gameField:FlxSprite;
     var gameFieldOutline:FlxSprite;
 
+    var countdownText:FlxText;
+    var timeToGameStart:Float;
+    var gameStarted:Bool;
+
     override public function create():Void
     {
         gameField = new FlxSprite(gameFieldXMargin, gameFieldYMargin);
         gameFieldOutline = new FlxSprite(gameFieldXMargin-2, gameFieldYMargin-2);
-
         add(gameFieldOutline);
         add(gameField);
         //creating now so width and height get defined
@@ -27,22 +31,54 @@ class SumoGameState extends BasicGameState
         gameFieldOutline.makeGraphic(cast width-2*gameFieldXMargin+4, cast height-2*gameFieldYMargin+4, FlxColor.WHITE);
         gameField.makeGraphic(cast width-2*gameFieldXMargin, cast height-2*gameFieldYMargin, FlxColor.BLACK);
 
-        makeSprite(new NewPolygonSprite(110, 240, Registry.player1Sides, 0, 50), [W, A, S, D]);
-        makeSprite(new NewPolygonSprite(530, 240, Registry.player2Sides, 180, 50), [UP, LEFT, DOWN, RIGHT]);
+        addSprites();
+
+        countdownText = new FlxText();
+        countdownText.setFormat(20);
+        add(countdownText);
+        countdownText.visible = true;
+
+        timeToGameStart = 3;
+        gameStarted = false;
+    }
+
+    public function addSprites():Void
+    {
+        makeSprite(new NewPolygonSprite(110, 240, Registry.player1Sides, 0, 50, FlxColor.GREEN), [W, A, S, D]);
+        makeSprite(new NewPolygonSprite(530, 240, Registry.player2Sides, 180, 50, FlxColor.YELLOW), [UP, LEFT, DOWN, RIGHT]);
     }
 
     override public function update(elapsed:Float):Void
     {
         super.update(elapsed);
 
+        if (!gameStarted)
+        {
+            pause();
+            timeToGameStart -= elapsed;
+            if (timeToGameStart>0)
+            {
+                updateCountdownText();
+            }
+            else
+            {
+                gameStarted = true;
+                countdownText.visible = false;
+                unpause();
+            }
+            return;
+        }  
+
         if (isPlayerDead(0))
         {
             trace("Player 2 wins!");
+            Registry.player2Sides += 1;
             resetGame();
         }
         else if (isPlayerDead(1))
         {
             trace("Player 1 wins!");
+            Registry.player1Sides += 1;
             resetGame();
         }
     }
@@ -70,7 +106,14 @@ class SumoGameState extends BasicGameState
         velocities = new Array<Point>();
         aVelocities = new Array<Float>();
         keyLists = new Array<Array<FlxKey>>();
-        makeSprite(new NewPolygonSprite(110, 240, Registry.player1Sides, 0, 50), [W, A, S, D]);
-        makeSprite(new NewPolygonSprite(530, 240, Registry.player2Sides, 180, 50), [UP, LEFT, DOWN, RIGHT]);
+        addSprites();
+    }
+
+    public function updateCountdownText():Void
+    {
+        countdownText.text = Std.string(Math.ceil(timeToGameStart));
+        trace(countdownText.text);
+        countdownText.x = (width-countdownText.width)/2;
+        countdownText.y = (height-countdownText.height)/2;
     }
 }

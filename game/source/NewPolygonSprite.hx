@@ -14,10 +14,11 @@ class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
     public var y:Float;
     public var angle:Float;
     public var numSides:Int;
+    public var color:FlxColor;
     var relativeX:Array<Float>;
 
 
-    public function new(centerX:Float, centerY:Float, numSides:Int, angle:Float, radius:Float = 100):Void
+    public function new(centerX:Float, centerY:Float, numSides:Int, angle:Float, radius:Float = 100, color:FlxColor=FlxColor.WHITE):Void
     {
         super();
 
@@ -28,13 +29,14 @@ class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
         this.y = centerY;
         this.angle = angle;
         this.RADIUS = radius;
+        this.color = color;
 
         var sideLength:Float = RADIUS * Math.sqrt(2*(1-Math.cos(2*Math.PI/numSides)));
         var interiorAngle:Float = Math.PI*(numSides-2)/numSides;
         var apothemLength:Float = Math.sqrt(RADIUS*RADIUS-(sideLength/2)*(sideLength/2));
 
         var indicator = new FlxSprite(0, -2);
-        indicator.makeGraphic(cast RADIUS, 4, FlxColor.WHITE);
+        indicator.makeGraphic(cast RADIUS, 4, color);
         add(indicator);
 
         for (i in 0...numSides)
@@ -42,7 +44,7 @@ class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
             /*var rectX:Float = centerX + apothemLength*Math.cos(Math.PI/numSides+2*i*Math.PI/numSides)-sideLength/2;
             var rectY:Float = centerY + apothemLength*Math.sin(Math.PI/numSides+2*i*Math.PI/numSides)-1;*/
             var rect:FlxSprite = new FlxSprite();
-            rect.makeGraphic(cast sideLength, 3, FlxColor.WHITE);
+            rect.makeGraphic(cast sideLength, 3, color);
             //rect.angle = (i+0.5)*360.0/numSides+90;
             add(rect);
         }

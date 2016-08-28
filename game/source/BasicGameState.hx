@@ -24,6 +24,8 @@ class BasicGameState extends FlxState
 
     var currentlyColliding:Bool;
 
+    var paused:Bool;
+
     public static inline var ACCELERATION:Float = 0.2;
     public static inline var ANGULAR_ACCELERATION:Float = 0.4;
     public static inline var ANGULAR_DRAG:Float = 0.96;
@@ -59,6 +61,7 @@ class BasicGameState extends FlxState
         add(temporaryCenter);
         
         currentlyColliding = false;
+        paused = false;
 
         super.create();
     }
@@ -71,39 +74,42 @@ class BasicGameState extends FlxState
 
         super.update(elapsed);
 
-        for(i in 0...playSprites.length){
-            
-            var sprite:NewPolygonSprite = playSprites[i];
+        if (!paused)
+        {
+            for(i in 0...playSprites.length)
+            {    
+                var sprite:NewPolygonSprite = playSprites[i];
 
-            // apply velocities
-            sprite.x += velocities[i].x * 60 * elapsed;
-            sprite.y += velocities[i].y * 60 * elapsed;
-            sprite.angle += aVelocities[i] * 60 * elapsed;
-            // trace(aVelocities[i]);
-            
-            // apply drags
-            velocities[i].x *= DRAG;
-            velocities[i].y *= DRAG;
-            aVelocities[i] *= ANGULAR_DRAG;
+                // apply velocities
+                sprite.x += velocities[i].x * 60 * elapsed;
+                sprite.y += velocities[i].y * 60 * elapsed;
+                sprite.angle += aVelocities[i] * 60 * elapsed;
+                // trace(aVelocities[i]);
+                
+                // apply drags
+                velocities[i].x *= DRAG;
+                velocities[i].y *= DRAG;
+                aVelocities[i] *= ANGULAR_DRAG;
 
-            // check key for accelerations
-            if(keyLists[i].length >= 4){
-                if(FlxG.keys.anyPressed([keyLists[i][1]])) aVelocities[i] -= ANGULAR_ACCELERATION * 60 * elapsed;
-                if(FlxG.keys.anyPressed([keyLists[i][3]])) aVelocities[i] += ANGULAR_ACCELERATION * 60 * elapsed;
-                if(FlxG.keys.anyPressed([keyLists[i][0]]))
-                    velocities[i].add(Point.polarPoint(ACCELERATION * 60 * elapsed, Math.PI*sprite.angle/180));
-                if(FlxG.keys.anyPressed([keyLists[i][2]]))
-                    velocities[i].subtract(Point.polarPoint(ACCELERATION * 60 * elapsed, Math.PI*sprite.angle/180));
+                // check key for accelerations
+                if(keyLists[i].length >= 4){
+                    if(FlxG.keys.anyPressed([keyLists[i][1]])) aVelocities[i] -= ANGULAR_ACCELERATION * 60 * elapsed;
+                    if(FlxG.keys.anyPressed([keyLists[i][3]])) aVelocities[i] += ANGULAR_ACCELERATION * 60 * elapsed;
+                    if(FlxG.keys.anyPressed([keyLists[i][0]]))
+                        velocities[i].add(Point.polarPoint(ACCELERATION * 60 * elapsed, Math.PI*sprite.angle/180));
+                    if(FlxG.keys.anyPressed([keyLists[i][2]]))
+                        velocities[i].subtract(Point.polarPoint(ACCELERATION * 60 * elapsed, Math.PI*sprite.angle/180));
+                }
+
+                // keep sprites within bounds
+                if(sprite.x < 0 && velocities[i].x < 0) velocities[i].x *= -1;
+                if(sprite.x > width && velocities[i].x > 0) velocities[i].x *= -1;
+                if(sprite.y < 0 && velocities[i].y < 0) velocities[i].y *= -1;
+                if(sprite.y > height && velocities[i].y > 0) velocities[i].y *= -1;
+
             }
-
-            // keep sprites within bounds
-            if(sprite.x < 0 && velocities[i].x < 0) velocities[i].x *= -1;
-            if(sprite.x > width && velocities[i].x > 0) velocities[i].x *= -1;
-            if(sprite.y < 0 && velocities[i].y < 0) velocities[i].y *= -1;
-            if(sprite.y > height && velocities[i].y > 0) velocities[i].y *= -1;
-
+            checkCollisions();
         }
-        checkCollisions();
         //checkCollisionsWithPoints();
     }
 
@@ -132,7 +138,7 @@ class BasicGameState extends FlxState
         
         var playerASides:Array<FlxSprite> = playSprites[a].members;
         var playerBSides:Array<FlxSprite> = playSprites[b].members;
-        
+        var playerBColor:FlxColor = playSprites[b].color;
         // get A endppoints
         var playerAEndpoints:Array<Point> = new Array<Point>();
         for (i in 0...playerASides.length)
@@ -188,7 +194,7 @@ class BasicGameState extends FlxState
                     break;
                 }
             }
-            rect.color = collides ? FlxColor.RED : FlxColor.WHITE;
+            rect.color = collides ? FlxColor.RED : playerBColor;
         }
 
         return superCollides;
@@ -329,6 +335,16 @@ class BasicGameState extends FlxState
         var p1 = new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, rectIndex);
         var p2 = new Point(centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2, rectIndex);
         return checkCollidePointAndSegment(p, p1, p2);
+    }
+
+    public function pause():Void
+    {
+        paused = true;
+    }
+
+    public function unpause():Void
+    {
+        paused = false;
     }
 
     // private function checkCollisionsWithPoints():Void
