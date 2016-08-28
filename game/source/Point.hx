@@ -54,12 +54,16 @@ class Point
         return newp;
     }
 
+    public function addition(rhs:Point):Point{
+        return new Point(this.x+rhs.x, this.y+rhs.y, this.polyInd);
+    }
+
     public static function plus(a:Point, b:Point):Point{
-        return new Point(a.x+b.x, a.y+b.y);
+        return new Point(a.x+b.x, a.y+b.y, a.polyInd);
     }
 
     public static function minus(a:Point, b:Point):Point{
-        return new Point(a.x-b.x, a.y-b.y);
+        return new Point(a.x-b.x, a.y-b.y, a.polyInd);
     }
 
     public static function dot(a:Point, b:Point):Float{

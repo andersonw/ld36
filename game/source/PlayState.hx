@@ -111,19 +111,9 @@ class PlayState extends FlxState
 
     private function checkCollisions():Void
     {
-    	var setCurrentlyCollidingFalse = true;
-
         var collided:Bool = collideSpriteAPointsWithSpriteBEdges(0,1);
-        if(collided)
-        	setCurrentlyCollidingFalse = false;
-
         var collided2:Bool = collideSpriteAPointsWithSpriteBEdges(1,0);
-        if(collided2)
-        	setCurrentlyCollidingFalse = false;
-
-        if(setCurrentlyCollidingFalse)
-        	currentlyColliding = false;
-
+        currentlyColliding = currentlyColliding && (collided || collided2);
 
         // var collided:Bool = collideSpriteAPointsWithSpriteBEdges(0,1);
         // if (!collided)
@@ -167,6 +157,7 @@ class PlayState extends FlxState
             {
                 // if (checkCollidePointAndRect(playerAEndpointsX[j], playerAEndpointsY[j], rect))
                 var p = playerAEndpoints[j];
+
                 if (checkCollidePointAndRect(p, rect, b))
                 {
                     collides = true;
@@ -178,12 +169,15 @@ class PlayState extends FlxState
                         var pcoord:Float = projectiveCoordinateWithRect(p, rect);
                         var collPoint:Point = pointAlongRectangle(rect, pcoord);
 
-                        var xRad:Float = collPoint.x - playSprites[b].x;
-                        var yRad:Float = collPoint.y - playSprites[b].y;
-                        var xVelDif:Float = velocities[a].x - velocities[b].x;
-                        var yVelDif:Float = velocities[a].y - velocities[b].y;
+                        var aCenter:Point = new Point(playSprites[a].x, playSprites[a].y, a);
+                        var bCenter:Point = new Point(playSprites[b].x, playSprites[b].y, b);
 
-                        aVelocities[b] += (xRad*yVelDif - yRad*xVelDif)*ANGULAR_RECOIL;
+                        var aRad:Point = Point.minus(p, aCenter);
+                        var bRad:Point = Point.minus(collPoint, bCenter);
+                        var velDif:Point = Point.minus(velocities[a], velocities[b]);
+
+                        aVelocities[a] += Point.cross(velDif, aRad)*ANGULAR_RECOIL;
+                        aVelocities[b] -= Point.cross(velDif, bRad)*ANGULAR_RECOIL;
 
                         var tmp:Point = velocities[0];
                         velocities[0] = velocities[1];
@@ -211,7 +205,7 @@ class PlayState extends FlxState
 	// 	return false;
 	// }
 
-	private function checkCollidePointAndSegment(p:Point, p1:Point, p2:Point):Bool{
+	private function checkCollidePointAndSegment(p:Point, p1:Point, p2:Point, debugPrint:Bool = false):Bool{
 		
 		// // standard form
 		// var a = p2.y - p1.y;
@@ -226,14 +220,14 @@ class PlayState extends FlxState
 		var newp2 = getUpdatedPoint(p2);
 		var newd = getDiscriminant(newp, newp1, newp2);
 
-		if(currd * newd > 0)
+		var dif:Point = Point.minus(p2, p1);
+		var onSegment = Point.dot(Point.minus(p, p1), dif) / Point.dot(dif, dif);
+		if(debugPrint) trace(currd, newd, onSegment, "DEBUG");
+
+		if(currd * newd > 0 && Math.abs(currd/Math.sqrt(Point.dot(dif, dif))) > 10)
 			return false;
 
-		var dif:Point = Point.minus(p2, p1);
-
-		var onSegment = Point.dot(Point.minus(p, p1), dif) / Point.dot(dif, dif);
 		if(onSegment >= 0 && onSegment <= 1){
-			trace(currd, newd, onSegment);
 			return true;
 		}
 
@@ -303,14 +297,14 @@ class PlayState extends FlxState
 	// 		centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2);
 	// }
 
-	private function checkCollidePointAndRect(p:Point, rect:FlxSprite, rectIndex:Int){
+	private function checkCollidePointAndRect(p:Point, rect:FlxSprite, rectIndex:Int, debugPrint:Bool = false){
 		var radAngle:Float = rect.angle * Math.PI / 180;
 		var centerX:Float = rect.x + rect.width/2;
 		var centerY:Float = rect.y + rect.height/2;
 
 		var p1 = new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, rectIndex);
 		var p2 = new Point(centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2, rectIndex);
-		return checkCollidePointAndSegment(p, p1, p2);
+		return checkCollidePointAndSegment(p, p1, p2, debugPrint);
 	}
 
 	// private function checkCollisionsWithPoints():Void
