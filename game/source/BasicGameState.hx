@@ -84,7 +84,7 @@ class BasicGameState extends FlxState
                 sprite.x += velocities[i].x * 60 * elapsed;
                 sprite.y += velocities[i].y * 60 * elapsed;
                 sprite.angle += aVelocities[i] * 60 * elapsed;
-                // trace(aVelocities[i]);
+                // max velocity is around 16
                 
                 // apply drags
                 velocities[i].x *= DRAG;
@@ -180,9 +180,12 @@ class BasicGameState extends FlxState
                         var bRad:Point = Point.minus(collPoint, bCenter);
                         var velDif:Point = Point.minus(velocities[a], velocities[b]);
 
+                        var oldAngVelocityA = aVelocities[a];
+                        aVelocities[a] = - aVelocities[b];
+                        aVelocities[b] = -oldAngVelocityA;
                         aVelocities[a] += Point.cross(velDif, aRad)*ANGULAR_RECOIL;
                         aVelocities[b] -= Point.cross(velDif, bRad)*ANGULAR_RECOIL;
-
+                        
                         var tmp:Point = velocities[0];
                         velocities[0] = velocities[1];
                         velocities[1] = tmp;
