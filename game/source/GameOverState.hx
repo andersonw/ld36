@@ -95,6 +95,7 @@ class GameOverState extends FlxSubState
         flashCover = new FlxSprite(0,0);
         flashCover.makeGraphic(cast w, cast h, FlxColor.WHITE);
         flashCover.alpha = 0;
+        loser.explode();
 	}
 
     override public function update(elapsed:Float):Void

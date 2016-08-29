@@ -162,8 +162,6 @@ class BasicGameState extends FlxSubState
         // handle loser
         var loser = (3-winner)-1;
         trace(loser);
-        playSprites[loser].explode();
-
         if (_parentState == null)
         {
             Registry.currentMinigameWinner = winner;
@@ -228,16 +226,6 @@ class BasicGameState extends FlxSubState
 
         if (!paused && !pauseMenu)
         {
-            
-            for(i in 0...gameObjects.length){
-                
-                var obj:GameObject = gameObjects[i];
-                obj.update(elapsed);
-                obj.vel = obj.vel.scale(DRAG);
-                obj.avel *= ANGULAR_DRAG;
-
-            }
-
             for(i in 0...playSprites.length)
             {    
                 var sprite:NewPolygonSprite = playSprites[i];

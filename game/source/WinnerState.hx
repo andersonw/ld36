@@ -73,7 +73,9 @@ class WinnerState extends FlxSubState
         winnerText.alignment = CENTER;
         add(winnerText);
         if(Registry.currentMinigameWinner == 1) Registry.player1Sides += 1;
-            else Registry.player2Sides += 1;
+        else Registry.player2Sides += 1;
+
+        loser.explode();
 	}
 
     override public function update(elapsed:Float):Void
