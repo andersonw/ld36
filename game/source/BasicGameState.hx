@@ -17,6 +17,7 @@ import flixel.input.keyboard.FlxKey;
 
 class BasicGameState extends FlxSubState
 {
+    public var gameObjects:Array<GameObject>;
     var playSprites:Array<NewPolygonSprite>;
     var velocities:Array<Point>;
     var aVelocities:Array<Float>;
@@ -59,6 +60,7 @@ class BasicGameState extends FlxSubState
 
     public function makeSprite(sprite:NewPolygonSprite, keymap:Array<FlxKey>, xv:Float = 0, yv:Float = 0, av:Float = 0):Int
     {
+        sprite.parent = this;
         playSprites.push(sprite);
         keyLists.push(keymap);
         velocities.push(new Point(xv, yv, -1));
@@ -72,6 +74,7 @@ class BasicGameState extends FlxSubState
         width = FlxG.width;
         height = FlxG.height;
 
+        gameObjects = new Array<GameObject>();
         playSprites = new Array<NewPolygonSprite>();
         velocities = new Array<Point>();
         aVelocities = new Array<Float>();
@@ -138,10 +141,11 @@ class BasicGameState extends FlxSubState
     }
 
     public function resetGame():Void{
+        for(obj in gameObjects)
+            obj.destroy();
         for (sprite in playSprites)
-        {
             sprite.destroy();
-        }
+        gameObjects = new Array<GameObject>();
         playSprites = new Array<NewPolygonSprite>();
         velocities = new Array<Point>();
         aVelocities = new Array<Float>();
@@ -150,6 +154,12 @@ class BasicGameState extends FlxSubState
     } //override to reset game
 
     public function declareWinner(winner:Int):Void{
+        
+        // handle loser
+        var loser = (3-winner)-1;
+        trace(loser);
+        playSprites[loser].explode();
+
         if (_parentState == null)
         {
             trace("Player " + winner + " wins!");
@@ -203,6 +213,16 @@ class BasicGameState extends FlxSubState
 
         if (!paused && !pauseMenu)
         {
+            
+            for(i in 0...gameObjects.length){
+                
+                var obj:GameObject = gameObjects[i];
+                obj.update(elapsed);
+                obj.vel = obj.vel.scale(DRAG);
+                obj.avel *= ANGULAR_DRAG;
+
+            }
+
             for(i in 0...playSprites.length)
             {    
                 var sprite:NewPolygonSprite = playSprites[i];
@@ -236,7 +256,9 @@ class BasicGameState extends FlxSubState
                 if(sprite.y > height && velocities[i].y > 0) velocities[i].y *= -1;
 
             }
+
             checkCollisions();
+
         }
     }
 
