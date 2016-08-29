@@ -8,6 +8,7 @@ import flixel.FlxState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.math.FlxMath;
+import flixel.system.FlxSound;
 import flixel.util.FlxCollision;
 import flixel.util.FlxColor;
 import flixel.input.keyboard.FlxKey;
@@ -20,6 +21,8 @@ class LapRaceState extends BasicGameState
 
     var currentLaneMarker:Array<Int>;
     var numberOfLaps:Array<Int>;
+
+    private var lapSound:FlxSound;
 
 	public static inline var MARKER_WIDTH:Int = 10;
 	public static inline var LANE_WIDTH:Int = 160;
@@ -82,6 +85,8 @@ class LapRaceState extends BasicGameState
         numberOfLaps = [0, 0];
 
         addSprites();
+
+        lapSound = FlxG.sound.load(AssetPaths.foodPickup__wav);
 	}
 
     public function addSprites():Void{
@@ -125,6 +130,7 @@ class LapRaceState extends BasicGameState
             case 3: advanceLaneMarker = (sprite.x < width/2 && sprite.y < height/2);
             }
             if(advanceLaneMarker){
+                lapSound.play();
                 innerLaneMarker[i][currentLaneMarker[i]].visible = false;
                 outerLaneMarker[i][currentLaneMarker[i]].visible = false;
 
