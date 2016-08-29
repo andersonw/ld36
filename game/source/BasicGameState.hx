@@ -431,8 +431,12 @@ class BasicGameState extends FlxSubState
             // trace(newp2.x, newp2.y);
         //}
 
-        if(currd * newd > 0)
+        var tolDiscrim = 0.5;
+        if(currd * newd > 0 - tolDiscrim)
             return false;
+        else if(Math.abs(currd*newd) < 1){
+            trace(currd*newd);
+        }
 
         var dif:Point = Point.minus(p2, p1);
 
@@ -531,16 +535,17 @@ class BasicGameState extends FlxSubState
     }
 
     private function getUpdatedPoint(p:Point):Point{
+        var numFrames = 1.5;
 
         var i = p.polyInd;
 
         // update by velocity
-        var newp:Point = Point.plus(p, velocities[i]);
+        var newp:Point = Point.plus(p, velocities[i].scale(numFrames));
         newp.polyInd = i;
 
         // update by rotation
         var origin = new Point(playSprites[i].x, playSprites[i].y, i);
-        return newp.rotatedCW(origin, aVelocities[i]);
+        return newp.rotatedCW(origin, numFrames*aVelocities[i]);
     }
 
     // private static function checkCollidePointAndRect(x:Float, y:Float, rect:FlxSprite){

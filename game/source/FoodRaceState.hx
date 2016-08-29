@@ -53,7 +53,7 @@ class FoodRaceState extends BasicGameState
 		}
 
         foodSprite = new FlxSprite(foodX[foodI] - FOOD_WIDTH/2, foodY[foodI] - FOOD_WIDTH/2);
-        foodSprite.makeGraphic(FOOD_WIDTH, FOOD_WIDTH, FlxColor.GREEN);
+        foodSprite.makeGraphic(FOOD_WIDTH, FOOD_WIDTH, FlxColor.RED);
         add(foodSprite);
 
         addSprites();
