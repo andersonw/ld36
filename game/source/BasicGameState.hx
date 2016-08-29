@@ -145,16 +145,17 @@ class BasicGameState extends FlxSubState
     } //override to reset game
 
     public function declareWinner(winner:Int):Void{
+        
+        // handle loser
+        var loser = (3-winner)-1;
+        trace(loser);
+        playSprites[loser].explode();
+
         if (_parentState == null)
         {
             trace("Player " + winner + " wins!");
             if(winner == 1) Registry.player1Sides += 1;
             else Registry.player2Sides += 1;
-
-            var loser = (3-winner)-1;
-            trace(loser);
-            playSprites[loser].explode();
-
             resetGame();
         }
         else
