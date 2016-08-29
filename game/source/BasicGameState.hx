@@ -8,6 +8,7 @@ import flixel.FlxState;
 import flixel.FlxSubState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
+import flixel.addons.ui.FlxButtonPlus;
 import flixel.math.FlxMath;
 import flixel.util.FlxCollision;
 import flixel.util.FlxColor;
@@ -26,6 +27,12 @@ class BasicGameState extends FlxSubState
     var currentlyColliding:Bool;
 
     var paused:Bool;
+    var pauseMenu:Bool;
+
+    var pauseScreenOutline:FlxSprite;
+    var pauseScreenContinue:FlxButtonPlus;
+    var pauseScreenBack:FlxButtonPlus;
+    var pauseScreenText:FlxText;
 
     //stuff for counting down at the beginning of a level
     var countdownText:FlxText;
@@ -64,6 +71,19 @@ class BasicGameState extends FlxSubState
         
         currentlyColliding = false;
         paused = false;
+        pauseMenu = false;
+
+        pauseScreenText = new FlxText(100, 100, 1000, "Paused", 20);
+
+        pauseScreenOutline = new FlxSprite(0, 0);
+        pauseScreenOutline.makeGraphic(Math.floor(width), Math.floor(height), FlxColor.WHITE);
+        pauseScreenOutline.alpha = 0.3;
+
+        pauseScreenContinue = new FlxButtonPlus(300, 300, exitPauseMenu, "Continue", 100, 20);
+        pauseScreenBack = new FlxButtonPlus(500, 300, backToMenu, "Exit", 100, 20);
+        add(pauseScreenBack);
+
+        exitPauseMenu();
 
         super.create();
 
@@ -73,6 +93,26 @@ class BasicGameState extends FlxSubState
         resetCountdown();
     }
 
+    private function enterPauseMenu():Void{
+        pauseMenu = true;
+        add(pauseScreenOutline);
+        add(pauseScreenContinue);
+        add(pauseScreenBack);
+        add(pauseScreenText);
+    }
+
+    private function exitPauseMenu():Void{
+        pauseMenu = false;
+        remove(pauseScreenOutline);
+        remove(pauseScreenContinue);
+        remove(pauseScreenBack);
+        remove(pauseScreenText);
+    }
+
+    private function backToMenu():Void{
+        FlxG.switchState(new MenuState());
+    }
+
     override public function update(elapsed:Float):Void
     {
         // TODO: adjust how drag works with frame rate
@@ -80,6 +120,7 @@ class BasicGameState extends FlxSubState
         // trace("begin state update");
 
         super.update(elapsed);
+
 
         if (!gameStarted)
         {
@@ -98,7 +139,15 @@ class BasicGameState extends FlxSubState
             return;
         }
 
-        if (!paused)
+        if(FlxG.keys.anyJustPressed([ESCAPE]))
+        {
+            if(pauseMenu)
+                exitPauseMenu();
+            else
+                enterPauseMenu();
+        }
+
+        if (!paused && !pauseMenu)
         {
             for(i in 0...playSprites.length)
             {    
@@ -242,7 +291,7 @@ class BasicGameState extends FlxSubState
                         // applyImpulse(b, new Point(-nvec.x, -nvec.y), -j, bRad);
                         applyImpulse(b, nvec, -j, new Point(-bRad.x, -bRad.y));
 
-                        trace(j);
+                        // trace(j);
 
 
                         // var totalL = Point.cross(velDif, aRad) + 0 * (5.0/4 * Math.pow(playSprites[a].RADIUS, 2));
@@ -289,14 +338,14 @@ class BasicGameState extends FlxSubState
 
     private function applyImpulse(ind:Int, n:Point, j:Float, rad:Point){
         // j /= 60.0;
-        trace("     ", aVelocities[ind]);
+        // trace("     ", aVelocities[ind]);
         aVelocities[ind] += j * 180.0/Math.PI / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(rad, n);
-        trace(ind, j / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(rad, n));
+        // trace(ind, j / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(rad, n));
 
         var velChange = new Point(n.x * j, n.y * j);
         velocities[ind] = Point.plus(velocities[ind], velChange);
-        trace(velChange.x, velChange.y);
-        trace(velocities[ind]);
+        // trace(velChange.x, velChange.y);
+        // trace(velocities[ind]);
 
     }
 
@@ -340,7 +389,8 @@ class BasicGameState extends FlxSubState
         var dif:Point = Point.minus(p2, p1);
 
         var onSegment = Point.dot(Point.minus(p, p1), dif) / Point.dot(dif, dif);
-        if(onSegment >= 0 && onSegment <= 1){
+        var tolerance = 0.07;
+        if(onSegment >= 0-tolerance && onSegment <= 1+tolerance){
             
             // 1088.11037239469,-155.058256960268,0.658473061964883
             // 7.30366411013711,123.808197889638 p
@@ -359,6 +409,11 @@ class BasicGameState extends FlxSubState
 
             return true;
         }
+
+        // var thing = Math.abs(onSegment - 0.5) - 0.5;
+        // if(thing < 0.1){
+        //     trace(thing);
+        // }
 
         return false;
     }
