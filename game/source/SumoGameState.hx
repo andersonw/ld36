@@ -15,10 +15,6 @@ class SumoGameState extends BasicGameState
     var gameField:FlxSprite;
     var gameFieldOutline:FlxSprite;
 
-    var countdownText:FlxText;
-    var timeToGameStart:Float;
-    var gameStarted:Bool;
-
     override public function create():Void
     {
         gameField = new FlxSprite(gameFieldXMargin, gameFieldYMargin);
@@ -32,11 +28,6 @@ class SumoGameState extends BasicGameState
         gameField.makeGraphic(cast width-2*gameFieldXMargin, cast height-2*gameFieldYMargin, FlxColor.BLACK);
 
         addSprites();
-
-        countdownText = new FlxText();
-        countdownText.setFormat(20);
-        add(countdownText);
-        resetCountdown();
     }
 
     public function addSprites():Void
@@ -48,23 +39,6 @@ class SumoGameState extends BasicGameState
     override public function update(elapsed:Float):Void
     {
         super.update(elapsed);
-
-        if (!gameStarted)
-        {
-            pause();
-            timeToGameStart -= elapsed;
-            if (timeToGameStart>0)
-            {
-                updateCountdownText();
-            }
-            else
-            {
-                gameStarted = true;
-                countdownText.visible = false;
-                unpause();
-            }
-            return;
-        }  
 
         if (isPlayerDead(0))
         {
@@ -105,19 +79,5 @@ class SumoGameState extends BasicGameState
         keyLists = new Array<Array<FlxKey>>();
         addSprites();
         resetCountdown();
-    }
-
-    public function resetCountdown():Void
-    {
-        countdownText.visible = true;
-        timeToGameStart = 3;
-        gameStarted = false;
-    }
-
-    public function updateCountdownText():Void
-    {
-        countdownText.text = Std.string(Math.ceil(timeToGameStart));
-        countdownText.x = (width-countdownText.width)/2;
-        countdownText.y = (height-countdownText.height)/2;
     }
 }

@@ -26,6 +26,11 @@ class BasicGameState extends FlxState
 
     var paused:Bool;
 
+    //stuff for counting down at the beginning of a level
+    var countdownText:FlxText;
+    var timeToGameStart:Float;
+    var gameStarted:Bool;
+
     public static inline var ACCELERATION:Float = 0.2;
     public static inline var ANGULAR_ACCELERATION:Float = 0.4;
     public static inline var ANGULAR_DRAG:Float = 0.96;
@@ -60,6 +65,11 @@ class BasicGameState extends FlxState
         paused = false;
 
         super.create();
+
+        countdownText = new FlxText();
+        countdownText.setFormat(20);
+        add(countdownText);
+        resetCountdown();
     }
 
     override public function update(elapsed:Float):Void
@@ -69,6 +79,23 @@ class BasicGameState extends FlxState
         // trace("begin state update");
 
         super.update(elapsed);
+
+        if (!gameStarted)
+        {
+            pause();
+            timeToGameStart -= elapsed;
+            if (timeToGameStart>0)
+            {
+                updateCountdownText();
+            }
+            else
+            {
+                gameStarted = true;
+                countdownText.visible = false;
+                unpause();
+            }
+            return;
+        }
 
         if (!paused)
         {
@@ -428,6 +455,20 @@ class BasicGameState extends FlxState
         var p1 = new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, rectIndex);
         var p2 = new Point(centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2, rectIndex);
         return checkCollidePointAndSegment(p, p1, p2);
+    }
+
+    public function resetCountdown():Void
+    {
+        countdownText.visible = true;
+        timeToGameStart = 3;
+        gameStarted = false;
+    }
+
+    public function updateCountdownText():Void
+    {
+        countdownText.text = Std.string(Math.ceil(timeToGameStart));
+        countdownText.x = (width-countdownText.width)/2;
+        countdownText.y = (height-countdownText.height)/2-50;
     }
 
     public function pause():Void

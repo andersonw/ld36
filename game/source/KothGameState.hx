@@ -7,10 +7,6 @@ import flixel.util.FlxColor;
 
 class KothGameState extends BasicGameState
 {
-    var countdownText:FlxText;
-    var timeToGameStart:Float;
-    var gameStarted:Bool;
-
     var hillX:Float;
     var hillY:Float;
     var player1Time:Float;
@@ -39,34 +35,12 @@ class KothGameState extends BasicGameState
         hill.makeGraphic(6, 6, FlxColor.BLUE);
         add(hill);
 
-        countdownText = new FlxText();
-        countdownText.setFormat(20);
-        add(countdownText);
-
-        resetCountdown();
         updateTimeText();
     }
 
     override public function update(elapsed:Float):Void
     {
         super.update(elapsed);
-
-        if (!gameStarted)
-        {
-            pause();
-            timeToGameStart -= elapsed;
-            if (timeToGameStart>0)
-            {
-                updateCountdownText();
-            }
-            else
-            {
-                gameStarted = true;
-                countdownText.visible = false;
-                unpause();
-            }
-            return;
-        }
 
         if (polygonContainsPoint(playSprites[0], hillX, hillY))
         {
@@ -127,20 +101,6 @@ class KothGameState extends BasicGameState
         makeSprite(new NewPolygonSprite(580, 240, Registry.player2Sides, 180, 50, FlxColor.LIME), [UP, LEFT, DOWN, RIGHT]);
     }
 
-    public function updateCountdownText():Void
-    {
-        countdownText.text = Std.string(Math.ceil(timeToGameStart));
-        countdownText.x = (width-countdownText.width)/2;
-        countdownText.y = (height-countdownText.height)/2-50;
-    }
-
-    public function resetCountdown():Void
-    {
-        countdownText.visible = true;
-        timeToGameStart = 3;
-        gameStarted = false;
-    }
-
     public function roundNum(num:Float, decimalPlaces:Int):String
     {
         num *= Math.pow(10, decimalPlaces);
@@ -150,7 +110,6 @@ class KothGameState extends BasicGameState
             numString = "0"+numString;
         return numString;
     }
-
 
     public function resetGame():Void
     {
