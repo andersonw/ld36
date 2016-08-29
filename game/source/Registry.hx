@@ -14,9 +14,12 @@ class Registry
     //set this to the actual player number (1 or 2), not 0
     public static var currentMinigameWinner:Int = 0;
 
+    public static var currentGameIndex:Int = -1;
     public static var gameList:Array<BasicGameState>;
-    public static var gameRules:Array<String> = ["Push the other player completely off the field!"
-                                                ,"Stay on the blue dot for 5 seconds!"];
+    public static var gameRules:Array<String> = ["Push your opponent off the field 3 times!"
+                                                ,"Stay on the blue dot for 4 seconds!"
+                                                ,"Collect 5 red squares!"
+                                                ,"Do two laps!"];
 
     public static function resetGameList():Void
     {

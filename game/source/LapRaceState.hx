@@ -28,7 +28,13 @@ class LapRaceState extends BasicGameState
 
 	override public function create():Void
 	{
+
+        centerBumper = new FlxSprite(LANE_WIDTH, LANE_WIDTH);
+        add(centerBumper);
+
         super.create();
+
+        centerBumper.makeGraphic(Math.floor(width-2*LANE_WIDTH), Math.floor(height-2*LANE_WIDTH), FlxColor.BLUE);
 
         // + Math.floor(Math.random()*7)
 
@@ -74,10 +80,6 @@ class LapRaceState extends BasicGameState
         currentLaneMarker = [0, 0];
         numberOfLaps = new Array<Int>();
         numberOfLaps = [0, 0];
-
-        centerBumper = new FlxSprite(LANE_WIDTH, LANE_WIDTH);
-        centerBumper.makeGraphic(Math.floor(width-2*LANE_WIDTH), Math.floor(height-2*LANE_WIDTH), FlxColor.BLUE);
-        add(centerBumper);
 
         addSprites();
 	}
