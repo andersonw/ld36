@@ -81,4 +81,8 @@ class Point
     public function magnitude():Float{
         return Math.pow(Math.pow(this.x, 2) + Math.pow(this.y, 2), 0.5);
     }
+
+    public function scale(factor:Float){
+        return new Point(this.x * factor, this.y * factor, this.polyInd);
+    }
 }
