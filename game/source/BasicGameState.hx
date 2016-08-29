@@ -7,6 +7,7 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
+import flixel.addons.ui.FlxButtonPlus;
 import flixel.math.FlxMath;
 import flixel.util.FlxCollision;
 import flixel.util.FlxColor;
@@ -25,6 +26,12 @@ class BasicGameState extends FlxState
     var currentlyColliding:Bool;
 
     var paused:Bool;
+    var pauseMenu:Bool;
+
+    var pauseScreenOutline:FlxSprite;
+    var pauseScreenContinue:FlxButtonPlus;
+    var pauseScreenBack:FlxButtonPlus;
+    var pauseScreenText:FlxText;
 
     public static inline var ACCELERATION:Float = 0.2;
     public static inline var ANGULAR_ACCELERATION:Float = 0.4;
@@ -58,8 +65,41 @@ class BasicGameState extends FlxState
         
         currentlyColliding = false;
         paused = false;
+        pauseMenu = false;
+
+        pauseScreenText = new FlxText(100, 100, 1000, "Paused", 20);
+
+        pauseScreenOutline = new FlxSprite(0, 0);
+        pauseScreenOutline.makeGraphic(Math.floor(width), Math.floor(height), FlxColor.WHITE);
+        pauseScreenOutline.alpha = 0.3;
+
+        pauseScreenContinue = new FlxButtonPlus(300, 300, exitPauseMenu, "Continue", 100, 20);
+        pauseScreenBack = new FlxButtonPlus(500, 300, backToMenu, "Exit", 100, 20);
+        add(pauseScreenBack);
+
+        exitPauseMenu();
 
         super.create();
+    }
+
+    private function enterPauseMenu():Void{
+        pauseMenu = true;
+        add(pauseScreenOutline);
+        add(pauseScreenContinue);
+        add(pauseScreenBack);
+        add(pauseScreenText);
+    }
+
+    private function exitPauseMenu():Void{
+        pauseMenu = false;
+        remove(pauseScreenOutline);
+        remove(pauseScreenContinue);
+        remove(pauseScreenBack);
+        remove(pauseScreenText);
+    }
+
+    private function backToMenu():Void{
+        FlxG.switchState(new MenuState());
     }
 
     override public function update(elapsed:Float):Void
@@ -70,7 +110,14 @@ class BasicGameState extends FlxState
 
         super.update(elapsed);
 
-        if (!paused)
+        if(FlxG.keys.anyJustPressed([ESCAPE])){
+            if(pauseMenu)
+                exitPauseMenu();
+            else
+                enterPauseMenu();
+        }
+
+        if (!paused && !pauseMenu)
         {
             for(i in 0...playSprites.length)
             {    
