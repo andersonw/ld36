@@ -25,18 +25,6 @@ class WariowareState extends FlxState
         super.update(elapsed);
 
         Registry.resetGameList();
-        if (Registry.currentMinigameWinner>0)
-        {
-            if (Registry.currentMinigameWinner==1)
-            {
-                Registry.player1Sides += 1;
-            }
-            else if (Registry.currentMinigameWinner==2)
-            {
-                Registry.player2Sides += 1;
-            }
-            Registry.currentMinigameWinner = 0;
-        }
         if (Registry.player1Sides>=8)
         {
             trace("Player 1 wins!");

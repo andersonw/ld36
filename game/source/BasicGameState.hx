@@ -21,6 +21,8 @@ class BasicGameState extends FlxSubState
     var aVelocities:Array<Float>;
     var keyLists:Array<Array<FlxKey>>;
 
+    var readyToClose:Bool;
+
     var width:Float;
     var height:Float;
 
@@ -64,6 +66,8 @@ class BasicGameState extends FlxSubState
     
     override public function create():Void
     {
+        readyToClose = false;
+
         width = FlxG.width;
         height = FlxG.height;
 
@@ -143,14 +147,18 @@ class BasicGameState extends FlxSubState
     public function declareWinner(winner:Int):Void{
         if (_parentState == null)
         {
-            trace("Player " + winner + " wins!");
-            if(winner == 1) Registry.player1Sides += 1;
-            else Registry.player2Sides += 1;
+            Registry.currentMinigameWinner = winner;
+            openSubState(new WinnerState(playSprites[0].x, playSprites[0].y, playSprites[0].angle,
+                playSprites[1].x, playSprites[1].y, playSprites[1].angle, playSprites[0].RADIUS, width, height));
             resetGame();
+            //trace("Player " + winner + " wins!");
         }
         else
         {
+
             Registry.currentMinigameWinner = winner;
+            _parentState.openSubState(new WinnerState(playSprites[0].x, playSprites[0].y, playSprites[0].angle,
+                playSprites[1].x, playSprites[1].y, playSprites[1].angle, playSprites[0].RADIUS, width, height));
             close();
         }
     }
@@ -162,6 +170,8 @@ class BasicGameState extends FlxSubState
         // trace("begin state update");
 
         super.update(elapsed);
+
+        if(readyToClose) close();
 
 
         if (!gameStarted)
