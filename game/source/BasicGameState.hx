@@ -84,7 +84,8 @@ class BasicGameState extends FlxState
                 sprite.x += velocities[i].x * 60 * elapsed;
                 sprite.y += velocities[i].y * 60 * elapsed;
                 sprite.angle += aVelocities[i] * 60 * elapsed;
-                // max velocity is around 16
+                // max velocity in game is around 16. theoretical is 20
+                // max angular velocity in game is around 9. theoretical is 10
                 
                 // apply drags
                 velocities[i].x *= DRAG;
@@ -92,7 +93,7 @@ class BasicGameState extends FlxState
                 aVelocities[i] *= ANGULAR_DRAG;
 
                 // check key for accelerations
-                if(keyLists[i].length >= 4){
+                if(keyLists[i].length >= 4 && !currentlyColliding){
                     if(FlxG.keys.anyPressed([keyLists[i][1]])) aVelocities[i] -= ANGULAR_ACCELERATION * 60 * elapsed;
                     if(FlxG.keys.anyPressed([keyLists[i][3]])) aVelocities[i] += ANGULAR_ACCELERATION * 60 * elapsed;
                     if(FlxG.keys.anyPressed([keyLists[i][0]]))
@@ -203,12 +204,14 @@ class BasicGameState extends FlxState
                             nvec = new Point(-nvec.x, -nvec.y);
                             top *= -1;
                         }
+                        // nvec should point from b.edge outwards
 
                         var e = 1;
                         var j = Math.abs( (1+e) * top ) / (1/1 + 1/1 + Math.pow(Point.cross(aRad, nvec),2) / (5.0/4 * Math.pow(playSprites[a].RADIUS, 2)) + Math.pow(Point.cross(bRad, nvec),2) / (5.0/4 * Math.pow(playSprites[b].RADIUS, 2)));
 
-                        applyImpulse(a, nvec, j, aRad);
-                        applyImpulse(b, nvec, j, bRad);
+                        applyImpulse(a, nvec, -j, aRad);
+                        // applyImpulse(b, new Point(-nvec.x, -nvec.y), -j, bRad);
+                        applyImpulse(b, nvec, j, new Point(-bRad.x, -bRad.y));
 
                         trace(j);
 
@@ -239,9 +242,10 @@ class BasicGameState extends FlxState
                         // aVelocities[b] -= dw2;
 
                         
-                        var tmp:Point = velocities[0];
-                        velocities[0] = velocities[1];
-                        velocities[1] = tmp;
+                                        // VELOCITY SWAP
+                        // var tmp:Point = velocities[0];
+                        // velocities[0] = velocities[1];
+                        // velocities[1] = tmp;
 
                     }
                     break;
@@ -255,8 +259,15 @@ class BasicGameState extends FlxState
     }
 
     private function applyImpulse(ind:Int, n:Point, j:Float, rad:Point){
-        aVelocities[ind] += j / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(n, rad);
-        trace(ind, j / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(n, rad));
+        trace("     ", aVelocities[ind]);
+        aVelocities[ind] += j / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(rad, n);
+        trace(ind, j / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(rad, n));
+
+        var velChange = new Point(n.x * j * Math.PI / 180.0, n.y * j * Math.PI / 180.0);
+        velocities[ind] = Point.plus(velocities[ind], velChange);
+        trace(velChange.x, velChange.y);
+        trace(velocities[ind]);
+
     }
 
     // private static function checkCollidePointAndSegment(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Bool{
