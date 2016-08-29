@@ -10,11 +10,8 @@ import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.addons.ui.FlxButtonPlus;
 import flixel.math.FlxMath;
-<<<<<<< HEAD
 import flixel.math.FlxRect;
-=======
 import flixel.system.FlxSound;
->>>>>>> 9263788099a28fdac4470d9d921e58732561083a
 import flixel.util.FlxCollision;
 import flixel.util.FlxColor;
 import flixel.input.keyboard.FlxKey;
@@ -638,5 +635,5 @@ class BasicGameState extends FlxSubState
     {
         paused = false;
     }
-    
+
 }
