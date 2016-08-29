@@ -7,10 +7,6 @@ import flixel.util.FlxColor;
 
 class KothGameState extends BasicGameState
 {
-    var countdownText:FlxText;
-    var timeToGameStart:Float;
-    var gameStarted:Bool;
-
     var hillX:Float;
     var hillY:Float;
     var player1Time:Float;
@@ -27,9 +23,9 @@ class KothGameState extends BasicGameState
         player1Time = 0;
         player2Time = 0;
         player1TimeText = new FlxText();
-        player1TimeText.setFormat(20, FlxColor.YELLOW);
+        player1TimeText.setFormat(20, Registry.player1Color);
         player2TimeText = new FlxText();
-        player2TimeText.setFormat(20, FlxColor.LIME);
+        player2TimeText.setFormat(20, Registry.player2Color);
         add(player1TimeText);
         add(player2TimeText);
 
@@ -39,34 +35,12 @@ class KothGameState extends BasicGameState
         hill.makeGraphic(6, 6, FlxColor.BLUE);
         add(hill);
 
-        countdownText = new FlxText();
-        countdownText.setFormat(20);
-        add(countdownText);
-
-        resetCountdown();
         updateTimeText();
     }
 
     override public function update(elapsed:Float):Void
     {
         super.update(elapsed);
-
-        if (!gameStarted)
-        {
-            pause();
-            timeToGameStart -= elapsed;
-            if (timeToGameStart>0)
-            {
-                updateCountdownText();
-            }
-            else
-            {
-                gameStarted = true;
-                countdownText.visible = false;
-                unpause();
-            }
-            return;
-        }
 
         if (polygonContainsPoint(playSprites[0], hillX, hillY))
         {
@@ -77,18 +51,8 @@ class KothGameState extends BasicGameState
             player2Time += elapsed;
         }
         updateTimeText();
-        if (player1Time>5)
-        {
-            trace("Player 1 wins!");
-            Registry.player1Sides += 1;
-            resetGame();
-        }
-        else if (player2Time>5)
-        {
-            trace("Player 2 wins!");
-            Registry.player2Sides += 1;
-            resetGame();
-        }
+        if (player1Time>3) declareWinner(1);
+        else if (player2Time>3) declareWinner(2);
     }
 
     public function polygonContainsPoint(polygon:NewPolygonSprite, pointX:Float, pointY:Float):Bool
@@ -123,22 +87,8 @@ class KothGameState extends BasicGameState
 
     public function addSprites():Void
     {
-        makeSprite(new NewPolygonSprite(60, 240, Registry.player1Sides, 0, 50, FlxColor.YELLOW), [W, A, S, D]);
-        makeSprite(new NewPolygonSprite(580, 240, Registry.player2Sides, 180, 50, FlxColor.LIME), [UP, LEFT, DOWN, RIGHT]);
-    }
-
-    public function updateCountdownText():Void
-    {
-        countdownText.text = Std.string(Math.ceil(timeToGameStart));
-        countdownText.x = (width-countdownText.width)/2;
-        countdownText.y = (height-countdownText.height)/2-50;
-    }
-
-    public function resetCountdown():Void
-    {
-        countdownText.visible = true;
-        timeToGameStart = 3;
-        gameStarted = false;
+        makeSprite(new NewPolygonSprite(60, 240, Registry.player1Sides, 0, 50, Registry.player1Color), [W, A, S, D]);
+        makeSprite(new NewPolygonSprite(580, 240, Registry.player2Sides, 180, 50, Registry.player2Color), [UP, LEFT, DOWN, RIGHT]);
     }
 
     public function roundNum(num:Float, decimalPlaces:Int):String
@@ -151,19 +101,10 @@ class KothGameState extends BasicGameState
         return numString;
     }
 
-
-    public function resetGame():Void
+    public override function resetGame():Void
     {
-        for (sprite in playSprites)
-        {
-            sprite.destroy();
-        }
-        playSprites = new Array<NewPolygonSprite>();
-        velocities = new Array<Point>();
-        aVelocities = new Array<Float>();
-        keyLists = new Array<Array<FlxKey>>();
+        super.resetGame();
         addSprites();
-        resetCountdown();
         player1Time = 0;
         player2Time = 0;
         updateTimeText();

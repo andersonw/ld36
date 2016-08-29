@@ -18,17 +18,16 @@ class FoodRaceState extends BasicGameState
 	public var foodX:Array<Float>;
 	public var foodY:Array<Float>;
 
+	public var foodHeld:Array<Int>;
+
 	public var playerTexts:Array<FlxText>;
 
 	public var p1Text:FlxText;
 	public var p2Text:FlxText;
-	public var winText:FlxText;
-
-	public var winPlayer:Int;
 
 	public static inline var FOOD_WIDTH:Float = 10;
 	public static inline var SPAWNER_WIDTH:Float = 4;
-	public static inline var WINNING_SIDES:Int = 12;
+	public static inline var FOOD_TO_WIN:Int = 5;
 
 	override public function create():Void
 	{
@@ -39,18 +38,13 @@ class FoodRaceState extends BasicGameState
         foodY = new Array<Float>();
         foodY = [height/4,	height/4,	3*height/4,	3*height/4,	height/2];
 
-        winPlayer = -1;
+        foodHeld = new Array<Int>();
+        foodHeld = [0, 0];
 
         playerTexts = new Array<FlxText>();
 
         makePlayerText(55, 55, FlxColor.YELLOW);
         makePlayerText(width-55, 55, FlxColor.LIME);
-
-        winText = new FlxText(width/2, 55, 20);
-        winText.size = 20;
-        winText.color = FlxColor.WHITE;
-        add(winText);
-
 
         for(i in 0...foodX.length){
 			var sprite = new FlxSprite(foodX[i] - SPAWNER_WIDTH/2, foodY[i] - SPAWNER_WIDTH/2);
@@ -62,8 +56,12 @@ class FoodRaceState extends BasicGameState
         foodSprite.makeGraphic(FOOD_WIDTH, FOOD_WIDTH, FlxColor.RED);
         add(foodSprite);
 
-		makeSprite(new NewPolygonSprite(width/4, height/2, 3, 0, 25, FlxColor.YELLOW), [W, A, S, D]);
-		makeSprite(new NewPolygonSprite(3*width/4, height/2, 3, 180, 25, FlxColor.LIME), [UP, LEFT, DOWN, RIGHT]);
+        addSprites();
+	}
+
+	private function addSprites(){
+		makeSprite(new NewPolygonSprite(width/4, height/2, Registry.player1Sides, 0, 25, Registry.player1Color), [W, A, S, D]);
+		makeSprite(new NewPolygonSprite(3*width/4, height/2, Registry.player2Sides, 180, 25, Registry.player2Color), [UP, LEFT, DOWN, RIGHT]);
 	}
 
 	private function makePlayerText(x:Float, y:Float, c:FlxColor):Int{
@@ -71,14 +69,13 @@ class FoodRaceState extends BasicGameState
 		playerTexts.push(new FlxText(x, y));
 		playerTexts[ret].size = 20;
 		playerTexts[ret].color = c;
-		playerTexts[ret].text = "3";
+		playerTexts[ret].text = "0";
 		add(playerTexts[ret]);
 		return ret;
 	}
 
 	override public function update(elapsed:Float):Void
 	{
-		if(winPlayer >= 0) pause();
 		for(i in 0...playSprites.length){
 			var sprite = playSprites[i];
 			for(rect in sprite){
@@ -88,18 +85,17 @@ class FoodRaceState extends BasicGameState
 					foodI = newFoodI + (newFoodI >= foodI ? 1 : 0);
 					trace(foodI);
 
-					var oldSprite = playSprites[i];
+					/*var oldSprite = playSprites[i];
 					playSprites[i] = new NewPolygonSprite(oldSprite.x, oldSprite.y, oldSprite.numSides+1, oldSprite.angle, oldSprite.RADIUS, oldSprite.color);
 					remove(oldSprite);
 					oldSprite.destroy();
-					add(playSprites[i]);
+					add(playSprites[i]);*/
 
-					playerTexts[i].text = "" + playSprites[i].numSides;
+					foodHeld[i] += 1;
+					playerTexts[i].text = "" + foodHeld[i];
 
-					if(playSprites[i].numSides >= WINNING_SIDES && winPlayer < 0){
-						winPlayer = i;
-						winText.text = "Player " + (winPlayer+1) + " won!";
-						winText.color = playerTexts[i].color;
+					if(foodHeld[i] >= FOOD_TO_WIN){
+						declareWinner(i + 1);
 					}
 				}
 			}
@@ -109,5 +105,12 @@ class FoodRaceState extends BasicGameState
 		foodSprite.y = foodY[foodI] - FOOD_WIDTH/2;
 
         super.update(elapsed);
+	}
+
+	public override function resetGame():Void{
+		super.resetGame();
+		addSprites();
+		foodI = 4;
+		foodHeld = [0, 0];
 	}
  }

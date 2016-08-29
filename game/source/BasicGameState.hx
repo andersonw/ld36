@@ -5,14 +5,16 @@ import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.FlxSubState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
+import flixel.addons.ui.FlxButtonPlus;
 import flixel.math.FlxMath;
 import flixel.util.FlxCollision;
 import flixel.util.FlxColor;
 import flixel.input.keyboard.FlxKey;
 
-class BasicGameState extends FlxState
+class BasicGameState extends FlxSubState
 {
     var playSprites:Array<NewPolygonSprite>;
     var velocities:Array<Point>;
@@ -25,6 +27,17 @@ class BasicGameState extends FlxState
     var currentlyColliding:Bool;
 
     var paused:Bool;
+    var pauseMenu:Bool;
+
+    var pauseScreenOutline:FlxSprite;
+    var pauseScreenContinue:FlxButtonPlus;
+    var pauseScreenBack:FlxButtonPlus;
+    var pauseScreenText:FlxText;
+
+    //stuff for counting down at the beginning of a level
+    var countdownText:FlxText;
+    var timeToGameStart:Float;
+    var gameStarted:Bool;
 
     public static inline var ACCELERATION:Float = 0.2;
     public static inline var ANGULAR_ACCELERATION:Float = 0.4;
@@ -58,8 +71,73 @@ class BasicGameState extends FlxState
         
         currentlyColliding = false;
         paused = false;
+        pauseMenu = false;
+
+        pauseScreenText = new FlxText(100, 100, 1000, "Paused", 20);
+
+        pauseScreenOutline = new FlxSprite(0, 0);
+        pauseScreenOutline.makeGraphic(Math.floor(width), Math.floor(height), FlxColor.WHITE);
+        pauseScreenOutline.alpha = 0.3;
+
+        pauseScreenContinue = new FlxButtonPlus(300, 300, exitPauseMenu, "Continue", 100, 20);
+        pauseScreenBack = new FlxButtonPlus(500, 300, backToMenu, "Exit", 100, 20);
+        add(pauseScreenBack);
+
+        exitPauseMenu();
 
         super.create();
+
+        countdownText = new FlxText();
+        countdownText.setFormat(20);
+        add(countdownText);
+        resetCountdown();
+    }
+
+    private function enterPauseMenu():Void{
+        pauseMenu = true;
+        add(pauseScreenOutline);
+        add(pauseScreenContinue);
+        add(pauseScreenBack);
+        add(pauseScreenText);
+    }
+
+    private function exitPauseMenu():Void{
+        pauseMenu = false;
+        remove(pauseScreenOutline);
+        remove(pauseScreenContinue);
+        remove(pauseScreenBack);
+        remove(pauseScreenText);
+    }
+
+    private function backToMenu():Void{
+        FlxG.switchState(new MenuState());
+    }
+
+    public function resetGame():Void{
+        for (sprite in playSprites)
+        {
+            sprite.destroy();
+        }
+        playSprites = new Array<NewPolygonSprite>();
+        velocities = new Array<Point>();
+        aVelocities = new Array<Float>();
+        keyLists = new Array<Array<FlxKey>>();
+        resetCountdown();
+    } //override to reset game
+
+    public function declareWinner(winner:Int):Void{
+        if (_parentState == null)
+        {
+            trace("Player " + winner + " wins!");
+            if(winner == 1) Registry.player1Sides += 1;
+            else Registry.player2Sides += 1;
+            resetGame();
+        }
+        else
+        {
+            Registry.currentMinigameWinner = winner;
+            close();
+        }
     }
 
     override public function update(elapsed:Float):Void
@@ -70,7 +148,33 @@ class BasicGameState extends FlxState
 
         super.update(elapsed);
 
-        if (!paused)
+
+        if (!gameStarted)
+        {
+            pause();
+            timeToGameStart -= elapsed;
+            if (timeToGameStart>0)
+            {
+                updateCountdownText();
+            }
+            else
+            {
+                gameStarted = true;
+                countdownText.visible = false;
+                unpause();
+            }
+            return;
+        }
+
+        if(FlxG.keys.anyJustPressed([ESCAPE]))
+        {
+            if(pauseMenu)
+                exitPauseMenu();
+            else
+                enterPauseMenu();
+        }
+
+        if (!paused && !pauseMenu)
         {
             for(i in 0...playSprites.length)
             {    
@@ -439,6 +543,20 @@ class BasicGameState extends FlxState
         var p1 = new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, rectIndex);
         var p2 = new Point(centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2, rectIndex);
         return checkCollidePointAndSegment(p, p1, p2);
+    }
+
+    public function resetCountdown():Void
+    {
+        countdownText.visible = true;
+        timeToGameStart = 3;
+        gameStarted = false;
+    }
+
+    public function updateCountdownText():Void
+    {
+        countdownText.text = Std.string(Math.ceil(timeToGameStart));
+        countdownText.x = (width-countdownText.width)/2;
+        countdownText.y = (height-countdownText.height)/2-50;
     }
 
     public function pause():Void
