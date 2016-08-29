@@ -55,10 +55,6 @@ class BasicGameState extends FlxState
         velocities = new Array<Point>();
         aVelocities = new Array<Float>();
         keyLists = new Array<Array<FlxKey>>();
-
-        var temporaryCenter:FlxSprite = new FlxSprite(640/2-3, 480/2-3);
-        temporaryCenter.makeGraphic(6, 6, FlxColor.BLUE);
-        add(temporaryCenter);
         
         currentlyColliding = false;
         paused = false;
