@@ -7,6 +7,7 @@ import flixel.FlxState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.math.FlxMath;
+import flixel.system.FlxSound;
 import flixel.util.FlxCollision;
 import flixel.util.FlxColor;
 import flixel.input.keyboard.FlxKey;
@@ -28,6 +29,8 @@ class FoodRaceState extends BasicGameState
 	public static inline var FOOD_WIDTH:Float = 10;
 	public static inline var SPAWNER_WIDTH:Float = 4;
 	public static inline var FOOD_TO_WIN:Int = 5;
+
+    private var foodPickupSound:FlxSound;
 
 	override public function create():Void
 	{
@@ -57,6 +60,8 @@ class FoodRaceState extends BasicGameState
         add(foodSprite);
 
         addSprites();
+
+        foodPickupSound = FlxG.sound.load(AssetPaths.foodPickup__wav);
 	}
 
 	private function addSprites(){
@@ -79,12 +84,14 @@ class FoodRaceState extends BasicGameState
 		for(i in 0...playSprites.length){
 			var sprite = playSprites[i];
 			for(rect in sprite){
-				if(BasicGameState.distanceFromPointToRect(new Point(foodX[foodI], foodY[foodI]), rect) < 10){
+				if(BasicGameState.distanceFromPointToRect(new Point(foodX[foodI], foodY[foodI]), rect) < 10)
+                {
 					trace("Player " + i + " got the food!");
+                    foodPickupSound.play();
 					var newFoodI:Int = Math.floor(Math.random() * (foodX.length-1));
 					foodI = newFoodI + (newFoodI >= foodI ? 1 : 0);
-					trace(foodI);
 
+                    //increasing number of sides code
 					/*var oldSprite = playSprites[i];
 					playSprites[i] = new NewPolygonSprite(oldSprite.x, oldSprite.y, oldSprite.numSides+1, oldSprite.angle, oldSprite.RADIUS, oldSprite.color);
 					remove(oldSprite);

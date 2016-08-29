@@ -10,12 +10,14 @@ import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.addons.ui.FlxButtonPlus;
 import flixel.math.FlxMath;
+import flixel.system.FlxSound;
 import flixel.util.FlxCollision;
 import flixel.util.FlxColor;
 import flixel.input.keyboard.FlxKey;
 
 class BasicGameState extends FlxSubState
 {
+    public var gameObjects:Array<GameObject>;
     var playSprites:Array<NewPolygonSprite>;
     var velocities:Array<Point>;
     var aVelocities:Array<Float>;
@@ -44,6 +46,10 @@ class BasicGameState extends FlxSubState
     var gameRulesText:FlxText;
     var showRules:Bool;
 
+    var polygonHitSound:FlxSound;
+    var countdownBeepSound:FlxSound;
+    var gameStartSound:FlxSound;
+
     public static inline var ACCELERATION:Float = 0.2;
     public static inline var ANGULAR_ACCELERATION:Float = 0.4;
     public static inline var ANGULAR_DRAG:Float = 0.96;
@@ -56,6 +62,7 @@ class BasicGameState extends FlxSubState
 
     public function makeSprite(sprite:NewPolygonSprite, keymap:Array<FlxKey>, xv:Float = 0, yv:Float = 0, av:Float = 0):Int
     {
+        sprite.parent = this;
         playSprites.push(sprite);
         keyLists.push(keymap);
         velocities.push(new Point(xv, yv, -1));
@@ -71,6 +78,7 @@ class BasicGameState extends FlxSubState
         width = FlxG.width;
         height = FlxG.height;
 
+        gameObjects = new Array<GameObject>();
         playSprites = new Array<NewPolygonSprite>();
         velocities = new Array<Point>();
         aVelocities = new Array<Float>();
@@ -110,6 +118,10 @@ class BasicGameState extends FlxSubState
             gameRulesText.y = 140;
         }
         add(gameRulesText);
+
+        polygonHitSound = FlxG.sound.load(AssetPaths.polygonHit__wav);
+        countdownBeepSound = FlxG.sound.load(AssetPaths.countdownBeep__wav, .3);
+        gameStartSound = FlxG.sound.load(AssetPaths.gameStart__wav, .3);
     }
 
     private function enterPauseMenu():Void{
@@ -133,10 +145,11 @@ class BasicGameState extends FlxSubState
     }
 
     public function resetGame():Void{
+        for(obj in gameObjects)
+            obj.destroy();
         for (sprite in playSprites)
-        {
             sprite.destroy();
-        }
+        gameObjects = new Array<GameObject>();
         playSprites = new Array<NewPolygonSprite>();
         velocities = new Array<Point>();
         aVelocities = new Array<Float>();
@@ -145,6 +158,12 @@ class BasicGameState extends FlxSubState
     } //override to reset game
 
     public function declareWinner(winner:Int):Void{
+        
+        // handle loser
+        var loser = (3-winner)-1;
+        trace(loser);
+        playSprites[loser].explode();
+
         if (_parentState == null)
         {
             Registry.currentMinigameWinner = winner;
@@ -166,13 +185,7 @@ class BasicGameState extends FlxSubState
     override public function update(elapsed:Float):Void
     {
         // TODO: adjust how drag works with frame rate
-
-        // trace("begin state update");
-
         super.update(elapsed);
-
-        if(readyToClose) close();
-
 
         if (!gameStarted)
         {
@@ -189,6 +202,7 @@ class BasicGameState extends FlxSubState
             }
             else
             {
+                gameStartSound.play();
                 gameStarted = true;
                 countdownText.visible = false;
                 gameRulesText.visible = false;
@@ -207,6 +221,16 @@ class BasicGameState extends FlxSubState
 
         if (!paused && !pauseMenu)
         {
+            
+            for(i in 0...gameObjects.length){
+                
+                var obj:GameObject = gameObjects[i];
+                obj.update(elapsed);
+                obj.vel = obj.vel.scale(DRAG);
+                obj.avel *= ANGULAR_DRAG;
+
+            }
+
             for(i in 0...playSprites.length)
             {    
                 var sprite:NewPolygonSprite = playSprites[i];
@@ -240,26 +264,14 @@ class BasicGameState extends FlxSubState
                 if(sprite.y > height && velocities[i].y > 0) velocities[i].y *= -1;
 
             }
+
             checkCollisions();
+
         }
-        //checkCollisionsWithPoints();
     }
 
     private function checkCollisions():Void
     {
-        // var setCurrentlyCollidingFalse = true;
-
-     //    var collided:Bool = collideSpriteAPointsWithSpriteBEdges(0,1);
-     //    if(collided)
-     //     setCurrentlyCollidingFalse = false;
-
-     //    var collided2:Bool = collideSpriteAPointsWithSpriteBEdges(1,0);
-     //    if(collided2)
-     //     setCurrentlyCollidingFalse = false;
-
-     //    if(setCurrentlyCollidingFalse)
-     //     currentlyColliding = false;
-
         currentlyColliding = (collideSpriteAPointsWithSpriteBEdges(0,1) || collideSpriteAPointsWithSpriteBEdges(1,0)) && currentlyColliding;
     }
 
@@ -292,7 +304,6 @@ class BasicGameState extends FlxSubState
 
             for (j in 0...playerASides.length)
             {
-                // if (checkCollidePointAndRect(playerAEndpointsX[j], playerAEndpointsY[j], rect))
                 var p = playerAEndpoints[j];
                 if (checkCollidePointAndRect(p, rect, b))
                 {
@@ -311,15 +322,6 @@ class BasicGameState extends FlxSubState
                         var aRad:Point = Point.minus(p, aCenter);
                         var bRad:Point = Point.minus(collPoint, bCenter);
                         var velDif:Point = Point.minus(velocities[a], velocities[b]);
-
-                        // var total = -Point.cross(velDif, aRad) + Point.cross(velDif, bRad);
-                        // trace(total);
-                        // var dwa = total / (2.0 * (5.0/4 * Math.pow(playSprites[a].RADIUS, 2)));
-                        // var dwb = total / (2.0 * (5.0/4 * Math.pow(playSprites[b].RADIUS, 2)));
-                        // trace(dwa, dwb);
-
-                        // aVelocities[a] -= dwa;
-                        // aVelocities[b] -= dwb;
 
                         var radAngle:Float = rect.angle * Math.PI / 180;
                         var centerX:Float = rect.x + rect.width/2;
@@ -349,40 +351,7 @@ class BasicGameState extends FlxSubState
                         // applyImpulse(b, new Point(-nvec.x, -nvec.y), -j, bRad);
                         applyImpulse(b, nvec, -j, new Point(-bRad.x, -bRad.y));
 
-                        // trace(j);
-
-
-                        // var totalL = Point.cross(velDif, aRad) + 0 * (5.0/4 * Math.pow(playSprites[a].RADIUS, 2));
-                        // var idwb = -totalL + Point.cross(velDif, bRad);
-                        // var dwb = idwb / (5.0/4 * Math.pow(playSprites[b].RADIUS, 2));
-                        // aVelocities[b] -= dwb;
-
-                        // var oldAngVelocityA = aVelocities[a];
-                        // aVelocities[a] = - aVelocities[b];
-                        // aVelocities[b] = -oldAngVelocityA;
-                        // aVelocities[a] += Point.cross(velDif, aRad)*ANGULAR_RECOIL;
-                        // aVelocities[b] -= Point.cross(velDif, bRad)*ANGULAR_RECOIL;
-                        // var aCenter = new Point(playSprites[a].x, playSprites[a].y, a);
-                        // var bCenter = new Point(playSprites[b].x, playSprites[b].y, b);
-                        // var r = Point.minus(bCenter, aCenter);
-                        // var d = r.magnitude();
-
-                        // //velDif = v1 - v2
-
-                        // var idw1 = (5.0/4 * Math.pow(playSprites[b].RADIUS, 2) + Math.pow(d, 2)) * Point.cross(velDif, r) / d;
-                        // var dw1 = idw1 / (5.0/4 * Math.pow(playSprites[a].RADIUS, 2));
-                        // aVelocities[a] -= dw1;
-
-                        // var idw2 = (5.0/4 * Math.pow(playSprites[a].RADIUS, 2) + Math.pow(d, 2)) * Point.cross(velDif, r) / d;
-                        // var dw2 = idw2 / (5.0/4 * Math.pow(playSprites[a].RADIUS, 2));
-                        // aVelocities[b] -= dw2;
-
-                        
-                                        // VELOCITY SWAP
-                        // var tmp:Point = velocities[0];
-                        // velocities[0] = velocities[1];
-                        // velocities[1] = tmp;
-
+                        polygonHitSound.play();
                     }
                     break;
                 }
@@ -395,29 +364,11 @@ class BasicGameState extends FlxSubState
     }
 
     private function applyImpulse(ind:Int, n:Point, j:Float, rad:Point){
-        // j /= 60.0;
-        // trace("     ", aVelocities[ind]);
         aVelocities[ind] += j * 180.0/Math.PI / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(rad, n);
-        // trace(ind, j / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(rad, n));
 
         var velChange = new Point(n.x * j, n.y * j);
         velocities[ind] = Point.plus(velocities[ind], velChange);
-        // trace(velChange.x, velChange.y);
-        // trace(velocities[ind]);
-
     }
-
-    // private static function checkCollidePointAndSegment(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Bool{
-    //  var dist:Float = Math.abs(((x - a1) * (b2 - b1) + (b1 - y) * (a2-a1)))/Math.sqrt((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1)); //wikipedia to the rescue
-    //  var projectionCoord:Float = ((x-a1)*(a2-a1) + (y-b1)*(b2-b1))/((b2-b1)*(b2-b1) + (a2-a1)*(a2-a1));
-    //  if(dist < COLLISION_THRESHOLD){
-    //      if(projectionCoord >= 0 && projectionCoord <= 1){
-    //          trace(dist + " " + projectionCoord + "\n");
-    //          return true;
-    //      }
-    //  }
-    //  return false;
-    // }
 
     private function checkCollidePointAndSegment(p:Point, p1:Point, p2:Point):Bool{
         
@@ -427,19 +378,6 @@ class BasicGameState extends FlxSubState
         var newp1 = getUpdatedPoint(p1);
         var newp2 = getUpdatedPoint(p2);
         var newd = getDiscriminant(newp, newp1, newp2);
-
-        //if(aVelocities[1] > 5){
-            //trace('begin');
-            //trace(aVelocities[1]);
-            // trace(distanceFromPointToSegment(p.x, p.y, p1.x, p1.y, p2.x, p2.y));
-            //trace(currd, newd);
-            //trace(p.x, p.y);
-            //trace(newp.x, newp.y);
-            // trace(p1.x, p1.y);
-            // trace(p2.x, p2.y);
-            // trace(newp1.x, newp1.y);
-            // trace(newp2.x, newp2.y);
-        //}
 
         var tolDiscrim = 0.5;
         if(currd * newd > 0 - tolDiscrim)
@@ -453,30 +391,8 @@ class BasicGameState extends FlxSubState
         var onSegment = Point.dot(Point.minus(p, p1), dif) / Point.dot(dif, dif);
         var tolerance = 0.07;
         if(onSegment >= 0-tolerance && onSegment <= 1+tolerance){
-            
-            // 1088.11037239469,-155.058256960268,0.658473061964883
-            // 7.30366411013711,123.808197889638 p
-            // 7.30366411013711,123.808197889638 newp
-            // -26.2886253361309,549.261153634737 p1
-            // -10.1313151170315,377.017310997377 p2
-            // -33.2027749734581,546.027389688666 newp1
-            // -17.0454647543587,373.783547051305 newp2
-
-            // (7.30366411013711 - -26.2886253361309) * (-10.1313151170315 - -26.2886253361309) + (123.808197889638 - 549.261153634737) * (377.017310997377 - 549.261153634737)
-            // (-10.1313151170315 - -26.2886253361309) * (-10.1313151170315 - -26.2886253361309) + (377.017310997377 - 549.261153634737) * (377.017310997377 - 549.261153634737)
-            // 73824.4130005
-            // 29929
-            // onSegment should be 2.46665150859
-
-
             return true;
         }
-
-        // var thing = Math.abs(onSegment - 0.5) - 0.5;
-        // if(thing < 0.1){
-        //     trace(thing);
-        // }
-
         return false;
     }
 
@@ -530,12 +446,6 @@ class BasicGameState extends FlxSubState
 
     }
 
-    // private static function checkCollidePointAndSegment(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Bool{
-    //  var dist:Float = Math.abs(distanceFromPointToSegment(x,y,a1,b1,a2,b2)); //wikipedia to the rescue
-    //  var projectionCoord:Float = projectiveCoordinate(x,y,a1,b1,a2,b2);
-    //  return (dist < COLLISION_THRESHOLD) && (projectionCoord >= 0) && (projectionCoord <= 1);
-    // }
-
     private static function getDiscriminant(p:Point, p1:Point, p2:Point):Float{
         var a = p2.y - p1.y;
         var b = p1.x - p2.x;
@@ -558,14 +468,6 @@ class BasicGameState extends FlxSubState
         return newp.rotatedCW(origin, numFrames*aVelocities[i]);
     }
 
-    // private static function checkCollidePointAndRect(x:Float, y:Float, rect:FlxSprite){
-    //  var radAngle:Float = rect.angle * Math.PI / 180;
-    //  var centerX:Float = rect.x + rect.width/2;
-    //  var centerY:Float = rect.y + rect.height/2;
-    //  return checkCollidePointAndSegment(x, y, centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2,
-    //      centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2);
-    // }
-
     private function checkCollidePointAndRect(p:Point, rect:FlxSprite, rectIndex:Int){
         var radAngle:Float = rect.angle * Math.PI / 180;
         var centerX:Float = rect.x + rect.width/2;
@@ -585,7 +487,12 @@ class BasicGameState extends FlxSubState
 
     public function updateCountdownText():Void
     {
-        countdownText.text = Std.string(Math.ceil(timeToGameStart));
+        var newText:String = Std.string(Math.ceil(timeToGameStart));
+        if (countdownText.text != newText)
+        {
+            countdownBeepSound.play();
+        }
+        countdownText.text = newText;
         countdownText.x = (width-countdownText.width)/2;
         countdownText.y = (height-countdownText.height)/2-50;
     }
@@ -599,55 +506,4 @@ class BasicGameState extends FlxSubState
     {
         paused = false;
     }
-
-    // private function checkCollisionsWithPoints():Void
-    // {
-    //  var player1Segments:Array<FlxSprite> = playSprites[0].members;
-    //  for(rect in player1Segments)
-    //  {
-    //      rect.color = checkCollidePointAndRect(640/2, 480/2, rect) ? FlxColor.BLUE : FlxColor.WHITE;
-    //  }
-    // }
-    
-/* This was old checkCollisions code that used pixelPerfectOverlap
-    private function checkCollisions():Void
-    {
-        var player1Segments:Array<FlxSprite> = playSprites[0].members;
-        var player2Segments:Array<FlxSprite> = playSprites[1].members;
-        
-        var superCollides = false;
-        for (i in 0...player1Segments.length)
-        {
-            var segment1 = player1Segments[i];
-            var collides = false;
-
-            for (j in 0...player2Segments.length)
-            {
-                var segment2 = player2Segments[j];
-                if (FlxG.pixelPerfectOverlap(segment1, segment2))
-                {
-                    collides = true;
-                    superCollides = true;
-                    if (!currentlyColliding)
-                    {
-                        currentlyColliding = true;
-                        var tmp:Float = xVelocities[0];
-                        xVelocities[0] = xVelocities[1];
-                        xVelocities[1] = tmp;
-
-                        tmp = yVelocities[0];
-                        yVelocities[0] = yVelocities[1];
-                        yVelocities[1] = tmp;
-                    }
-                    break;
-                }   
-            }
-            segment1.color = collides ? FlxColor.RED : FlxColor.WHITE;
-        }
-        if (!superCollides)
-        {
-            currentlyColliding = false;
-        }
-    }
-*/
 }

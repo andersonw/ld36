@@ -14,11 +14,16 @@ class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
     public var y:Float;
     public var angle:Float;
     public var numSides:Int;
+    public var parent:BasicGameState;
     public var color:FlxColor;
+    public var status:String;
     var relativeX:Array<Float>;
+    
+    var expVels:Array<Point>;
+    var aVels:Array<Float>;
 
 
-    public function new(centerX:Float, centerY:Float, numSides:Int, angle:Float, radius:Float = 100, color:FlxColor=FlxColor.WHITE):Void
+    public function new(centerX:Float, centerY:Float, numSides:Int, angle:Float, radius:Float = 100, ?parentState:BasicGameState, color:FlxColor=FlxColor.WHITE):Void
     {
         super();
 
@@ -29,7 +34,9 @@ class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
         this.y = centerY;
         this.angle = angle;
         this.RADIUS = radius;
+        this.parent = parentState;
         this.color = color;
+        this.status = "intact";
 
         var sideLength:Float = RADIUS * Math.sqrt(2*(1-Math.cos(2*Math.PI/numSides)));
         var interiorAngle:Float = Math.PI*(numSides-2)/numSides;
@@ -71,9 +78,29 @@ class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
         for(i in 1...members.length)
         {
             var rect:FlxSprite = members[i];
-            rect.x = x + apothemLength*Math.cos(Math.PI/numSides+2*i*Math.PI/numSides + angle*Math.PI/180)-sideLength/2; 
-            rect.y = y + apothemLength*Math.sin(Math.PI/numSides+2*i*Math.PI/numSides + angle*Math.PI/180)-1;
-            rect.angle = (i+0.5)*360.0/numSides + 90 + angle;
+            if(status == "intact"){
+                rect.x = x + apothemLength*Math.cos(Math.PI/numSides+2*i*Math.PI/numSides + angle*Math.PI/180)-sideLength/2; 
+                rect.y = y + apothemLength*Math.sin(Math.PI/numSides+2*i*Math.PI/numSides + angle*Math.PI/180)-1;
+                rect.angle = (i+0.5)*360.0/numSides + 90 + angle;
+            }
+            else if(status == "exploding"){
+
+            }
+        }
+    }
+
+    /*
+    To be called when the polygon dies.
+    Polygon is expected to be deleted soon after.
+    */
+    public function explode():Void{
+        this.status = "exploding";
+        trace('exploding');
+        for(i in 0...members.length){
+            var rect:FlxSprite = members[i];
+            var gobj = new GameObject(rect, new Point(1, 1), 1, this.color);
+            parent.gameObjects.push(gobj);
+            trace('rect');
         }
     }
 }
