@@ -85,6 +85,7 @@ class GameOverState extends FlxSubState
         winnerText = new FlxText(50, h/4, 500, "Player " + Registry.currentMinigameWinner + " became a wheel!\nSpace to continue", 20);
         winnerText.visible = false;
         winnerText.alignment = CENTER;
+        winnerText.setFormat(Registry.FONT_PATH, 30);
         add(winnerText);
 
         if(Registry.currentMinigameWinner == 1) Registry.player1Sides += 1;
@@ -95,6 +96,7 @@ class GameOverState extends FlxSubState
         flashCover = new FlxSprite(0,0);
         flashCover.makeGraphic(cast w, cast h, FlxColor.WHITE);
         flashCover.alpha = 0;
+        loser.explode();
 	}
 
     override public function update(elapsed:Float):Void

@@ -37,8 +37,8 @@ class BasicGameState extends FlxSubState
     var pauseMenu:Bool;
 
     var pauseScreenOutline:FlxSprite;
-    var pauseScreenContinue:FlxButtonPlus;
-    var pauseScreenBack:FlxButtonPlus;
+    var pauseScreenContinue:BetterButton;
+    var pauseScreenBack:BetterButton;
     var pauseScreenText:FlxText;
 
     //stuff for counting down at the beginning of a level
@@ -96,14 +96,19 @@ class BasicGameState extends FlxSubState
         paused = false;
         pauseMenu = false;
 
-        pauseScreenText = new FlxText(100, 100, 1000, "Paused", 20);
+        pauseScreenText = new FlxText(310, 100, "Paused", 20);
+        pauseScreenText.setFormat(Registry.FONT_PATH);
+        pauseScreenText.x = (width-pauseScreenText.width)/2;
 
         pauseScreenOutline = new FlxSprite(0, 0);
         pauseScreenOutline.makeGraphic(Math.floor(width), Math.floor(height), FlxColor.WHITE);
         pauseScreenOutline.alpha = 0.3;
 
-        pauseScreenContinue = new FlxButtonPlus(300, 300, exitPauseMenu, "Continue", 100, 20);
-        pauseScreenBack = new FlxButtonPlus(500, 300, backToMenu, "Exit", 100, 20);
+        //pauseScreenContinue = new FlxButtonPlus(300, 300, exitPauseMenu, "Continue", 100, 20);
+        //pauseScreenBack = new FlxButtonPlus(500, 300, backToMenu, "Exit", 100, 20);
+        pauseScreenContinue = new BetterButton(120, 300, 150, 20, "Continue", exitPauseMenu);
+        pauseScreenBack = new BetterButton(370, 300, 150, 20, "Exit", backToMenu);
+
         add(pauseScreenBack);
 
         exitPauseMenu();
@@ -111,14 +116,14 @@ class BasicGameState extends FlxSubState
         super.create();
 
         countdownText = new FlxText();
-        countdownText.setFormat(20);
+        countdownText.setFormat(Registry.FONT_PATH, 20);
         add(countdownText);
         resetCountdown();
 
         showRules = true;
 
         gameRulesText = new FlxText();
-        gameRulesText.setFormat(18);
+        gameRulesText.setFormat(Registry.FONT_PATH, 18);
         if (Registry.currentGameIndex>=0)
         {
             gameRulesText.text = Registry.gameRules[Registry.currentGameIndex];
@@ -149,7 +154,7 @@ class BasicGameState extends FlxSubState
     }
 
     private function backToMenu():Void{
-        FlxG.switchState(new MenuState());
+        FlxG.switchState(new FinalizedMenuState());
     }
 
     public function resetGame():Void{
@@ -170,8 +175,6 @@ class BasicGameState extends FlxSubState
         // handle loser
         var loser = (3-winner)-1;
         trace(loser);
-        playSprites[loser].explode();
-
         if (_parentState == null)
         {
             Registry.currentMinigameWinner = winner;
@@ -236,16 +239,6 @@ class BasicGameState extends FlxSubState
 
         if (!paused && !pauseMenu)
         {
-            
-            for(i in 0...gameObjects.length){
-                
-                var obj:GameObject = gameObjects[i];
-                obj.update(elapsed);
-                obj.vel = obj.vel.scale(DRAG);
-                obj.avel *= ANGULAR_DRAG;
-
-            }
-
             for(i in 0...playSprites.length)
             {    
                 var sprite:NewPolygonSprite = playSprites[i];
