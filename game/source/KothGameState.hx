@@ -42,13 +42,16 @@ class KothGameState extends BasicGameState
     {
         super.update(elapsed);
 
-        if (polygonContainsPoint(playSprites[0], hillX, hillY))
+        if (!pauseMenu)
         {
-            player1Time += elapsed;
-        }
-        else if (polygonContainsPoint(playSprites[1], hillX, hillY))
-        {
-            player2Time += elapsed;
+            if (polygonContainsPoint(playSprites[0], hillX, hillY))
+            {
+                player1Time += elapsed;
+            }
+            else if (polygonContainsPoint(playSprites[1], hillX, hillY))
+            {
+                player2Time += elapsed;
+            }
         }
         updateTimeText();
         if (player1Time>4) declareWinner(1);
