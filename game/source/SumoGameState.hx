@@ -55,21 +55,16 @@ class SumoGameState extends BasicGameState
     {
         super.update(elapsed);
 
-        if (player1Score>=3)
-        {
-            player1Score = 0;
-            declareWinner(1);
-        }
-        else if (player2Score>=3)
-        {
-            player2Score = 0;
-            declareWinner(2);
-        }
         if (isPlayerDead(0)) 
         {
             player2Score += 1;
             updateScoreText();
             showRules = false;
+            if (player2Score>=3)
+            {
+                player2Score = 0;
+                declareWinner(2);
+            }
             resetGame();
         }
         else if (isPlayerDead(1)) 
@@ -77,6 +72,11 @@ class SumoGameState extends BasicGameState
             player1Score += 1;
             updateScoreText();
             showRules = false;
+            if (player1Score>=3)
+            {
+                player1Score = 0;
+                declareWinner(1);
+            }
             resetGame();
         }
     }

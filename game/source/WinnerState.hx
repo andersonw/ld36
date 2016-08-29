@@ -32,23 +32,22 @@ class WinnerState extends FlxSubState
     var winy:Float;
     var wina:Float;
 
-    public override function new(p1x:Float, p1y:Float, p1a:Float, p2x:Float, p2y:Float, p2a:Float, r:Float, w:Float, h:Float, thing:Int = 4){
-        super(thing);
-        moveTimer = 0;
-        this.p1x = p1x;
-        this.p1y = p1y;
-        this.p1a = p1a;
-        this.p2x = p2x;
-        this.p2y = p2y;
-        this.p2a = p2a;
-        this.w = w;
-        this.h = h;
-        this.r = r;
-        hasFinished = false;
-    }
-
 	override public function create():Void
 	{
+        var data = Registry.currentPlayerData;
+        p1x = data.p1x;
+        p1y = data.p1y;
+        p1a = data.p1a;
+        p2x = data.p2x;
+        p2y = data.p2y;
+        p2a = data.p2a;
+        w = data.w;
+        h = data.h;
+        r = data.r;
+
+        moveTimer = 0;
+        hasFinished = false;
+
         cover = new FlxSprite(0,0);
         cover.makeGraphic(cast w, cast h, FlxColor.BLACK);
         add(cover);
@@ -71,6 +70,7 @@ class WinnerState extends FlxSubState
         add(loser);
         winnerText = new FlxText(0, h/4, 500, "Player " + Registry.currentMinigameWinner + " is the winner!\nSpace to continue", 20);
         winnerText.visible = false;
+        winnerText.alignment = CENTER;
         add(winnerText);
         if(Registry.currentMinigameWinner == 1) Registry.player1Sides += 1;
             else Registry.player2Sides += 1;
@@ -78,6 +78,7 @@ class WinnerState extends FlxSubState
 
     override public function update(elapsed:Float):Void
     {
+        super.update(elapsed);
         winner.angle -= (wina + 90) * elapsed/WIN_TIMER;
         if(moveTimer < WIN_TIMER){
             winner.x -= (winx - w/2) * elapsed/WIN_TIMER;
@@ -97,7 +98,6 @@ class WinnerState extends FlxSubState
                 close();
             }
         }
-        winner.update(elapsed);
         moveTimer += elapsed;
     }
 }

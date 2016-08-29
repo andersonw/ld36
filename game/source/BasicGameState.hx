@@ -120,8 +120,8 @@ class BasicGameState extends FlxSubState
         add(gameRulesText);
 
         polygonHitSound = FlxG.sound.load(AssetPaths.polygonHit__wav);
-        countdownBeepSound = FlxG.sound.load(AssetPaths.countdownBeep__wav, .3);
-        gameStartSound = FlxG.sound.load(AssetPaths.gameStart__wav, .3);
+        countdownBeepSound = FlxG.sound.load(AssetPaths.countdownBeep__wav, .15);
+        gameStartSound = FlxG.sound.load(AssetPaths.gameStart__wav, .15);
     }
 
     private function enterPauseMenu():Void{
@@ -167,17 +167,24 @@ class BasicGameState extends FlxSubState
         if (_parentState == null)
         {
             Registry.currentMinigameWinner = winner;
-            openSubState(new WinnerState(playSprites[0].x, playSprites[0].y, playSprites[0].angle,
-                playSprites[1].x, playSprites[1].y, playSprites[1].angle, playSprites[0].RADIUS, width, height));
+            var playerData:Registry.PlayerData = new Registry.PlayerData(playSprites[0].x, playSprites[0].y, playSprites[0].angle,
+                playSprites[1].x, playSprites[1].y, playSprites[1].angle, width, height, playSprites[0].RADIUS);
+            Registry.currentPlayerData = playerData;
+
+            openSubState(new WinnerState());
             resetGame();
             //trace("Player " + winner + " wins!");
         }
         else
         {
-
             Registry.currentMinigameWinner = winner;
-            _parentState.openSubState(new WinnerState(playSprites[0].x, playSprites[0].y, playSprites[0].angle,
-                playSprites[1].x, playSprites[1].y, playSprites[1].angle, playSprites[0].RADIUS, width, height));
+            var playerData:Registry.PlayerData = new Registry.PlayerData(playSprites[0].x, playSprites[0].y, playSprites[0].angle,
+                playSprites[1].x, playSprites[1].y, playSprites[1].angle, width, height, playSprites[0].RADIUS);
+            /*_parentState.openSubState(new WinnerState(playSprites[0].x, playSprites[0].y, playSprites[0].angle,
+                playSprites[1].x, playSprites[1].y, playSprites[1].angle, playSprites[0].RADIUS, width, height));*/
+            
+            Registry.currentPlayerData = playerData;
+            _parentState.openSubState(new WinnerState());
             close();
         }
     }
@@ -443,7 +450,6 @@ class BasicGameState extends FlxSubState
         var radAngle:Float = rect.angle * Math.PI/180;
         return averageOfPoints(new Point(rect.x + rect.width/2 - rect.width*Math.cos(radAngle)/2, rect.y + rect.height/2 - rect.width*Math.sin(radAngle)/2,-1),
             new Point(rect.x + rect.width/2 + rect.width*Math.cos(radAngle)/2, rect.y + rect.height/2 + rect.width*Math.sin(radAngle)/2,-1), alpha);
-
     }
 
     private static function getDiscriminant(p:Point, p1:Point, p2:Point):Float{
