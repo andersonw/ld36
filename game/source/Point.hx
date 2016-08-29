@@ -77,4 +77,8 @@ class Point
     public static function polarPoint(r:Float, theta:Float):Point{
         return new Point(r * Math.cos(theta), r * Math.sin(theta));
     }
+
+    public function magnitude():Float{
+        return Math.pow(Math.pow(this.x, 2) + Math.pow(this.y, 2), 0.5);
+    }
 }

@@ -180,11 +180,64 @@ class BasicGameState extends FlxState
                         var bRad:Point = Point.minus(collPoint, bCenter);
                         var velDif:Point = Point.minus(velocities[a], velocities[b]);
 
-                        var oldAngVelocityA = aVelocities[a];
-                        aVelocities[a] = - aVelocities[b];
-                        aVelocities[b] = -oldAngVelocityA;
-                        aVelocities[a] += Point.cross(velDif, aRad)*ANGULAR_RECOIL;
-                        aVelocities[b] -= Point.cross(velDif, bRad)*ANGULAR_RECOIL;
+                        // var total = -Point.cross(velDif, aRad) + Point.cross(velDif, bRad);
+                        // trace(total);
+                        // var dwa = total / (2.0 * (5.0/4 * Math.pow(playSprites[a].RADIUS, 2)));
+                        // var dwb = total / (2.0 * (5.0/4 * Math.pow(playSprites[b].RADIUS, 2)));
+                        // trace(dwa, dwb);
+
+                        // aVelocities[a] -= dwa;
+                        // aVelocities[b] -= dwb;
+
+                        var radAngle:Float = rect.angle * Math.PI / 180;
+                        var centerX:Float = rect.x + rect.width/2;
+                        var centerY:Float = rect.y + rect.height/2;
+
+                        var p1 = new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, b);
+                        var p2 = new Point(centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2, b);
+                        var line = Point.minus(p2, p1);
+                        var nvec = new Point(-line.y / line.magnitude(), line.x / line.magnitude());
+
+                        var top = Point.dot(Point.minus(aCenter, bCenter), nvec);
+                        if(top > 0){
+                            nvec = new Point(-nvec.x, -nvec.y);
+                            top *= -1;
+                        }
+
+                        var e = 1;
+                        var j = Math.abs( (1+e) * top ) / (1/1 + 1/1 + Math.pow(Point.cross(aRad, nvec),2) / (5.0/4 * Math.pow(playSprites[a].RADIUS, 2)) + Math.pow(Point.cross(bRad, nvec),2) / (5.0/4 * Math.pow(playSprites[b].RADIUS, 2)));
+
+                        applyImpulse(a, nvec, j, aRad);
+                        applyImpulse(b, nvec, j, bRad);
+
+                        trace(j);
+
+
+                        // var totalL = Point.cross(velDif, aRad) + 0 * (5.0/4 * Math.pow(playSprites[a].RADIUS, 2));
+                        // var idwb = -totalL + Point.cross(velDif, bRad);
+                        // var dwb = idwb / (5.0/4 * Math.pow(playSprites[b].RADIUS, 2));
+                        // aVelocities[b] -= dwb;
+
+                        // var oldAngVelocityA = aVelocities[a];
+                        // aVelocities[a] = - aVelocities[b];
+                        // aVelocities[b] = -oldAngVelocityA;
+                        // aVelocities[a] += Point.cross(velDif, aRad)*ANGULAR_RECOIL;
+                        // aVelocities[b] -= Point.cross(velDif, bRad)*ANGULAR_RECOIL;
+                        // var aCenter = new Point(playSprites[a].x, playSprites[a].y, a);
+                        // var bCenter = new Point(playSprites[b].x, playSprites[b].y, b);
+                        // var r = Point.minus(bCenter, aCenter);
+                        // var d = r.magnitude();
+
+                        // //velDif = v1 - v2
+
+                        // var idw1 = (5.0/4 * Math.pow(playSprites[b].RADIUS, 2) + Math.pow(d, 2)) * Point.cross(velDif, r) / d;
+                        // var dw1 = idw1 / (5.0/4 * Math.pow(playSprites[a].RADIUS, 2));
+                        // aVelocities[a] -= dw1;
+
+                        // var idw2 = (5.0/4 * Math.pow(playSprites[a].RADIUS, 2) + Math.pow(d, 2)) * Point.cross(velDif, r) / d;
+                        // var dw2 = idw2 / (5.0/4 * Math.pow(playSprites[a].RADIUS, 2));
+                        // aVelocities[b] -= dw2;
+
                         
                         var tmp:Point = velocities[0];
                         velocities[0] = velocities[1];
@@ -199,6 +252,11 @@ class BasicGameState extends FlxState
 
         return superCollides;
 
+    }
+
+    private function applyImpulse(ind:Int, n:Point, j:Float, rad:Point){
+        aVelocities[ind] += j / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(n, rad);
+        trace(ind, j / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(n, rad));
     }
 
     // private static function checkCollidePointAndSegment(x:Float, y:Float, a1:Float, b1:Float, a2:Float, b2:Float):Bool{
