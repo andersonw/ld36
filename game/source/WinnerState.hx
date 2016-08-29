@@ -74,7 +74,9 @@ class WinnerState extends FlxSubState
         winnerText.setFormat(Registry.FONT_PATH, 30);
         add(winnerText);
         if(Registry.currentMinigameWinner == 1) Registry.player1Sides += 1;
-            else Registry.player2Sides += 1;
+        else Registry.player2Sides += 1;
+
+        loser.explode();
 	}
 
     override public function update(elapsed:Float):Void
