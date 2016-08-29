@@ -97,6 +97,7 @@ class BasicGameState extends FlxSubState
         pauseMenu = false;
 
         pauseScreenText = new FlxText(310, 100, "Paused", 20);
+        pauseScreenText.setFormat(Registry.FONT_PATH);
         pauseScreenText.x = (width-pauseScreenText.width)/2;
 
         pauseScreenOutline = new FlxSprite(0, 0);
@@ -115,14 +116,14 @@ class BasicGameState extends FlxSubState
         super.create();
 
         countdownText = new FlxText();
-        countdownText.setFormat(20);
+        countdownText.setFormat(Registry.FONT_PATH, 20);
         add(countdownText);
         resetCountdown();
 
         showRules = true;
 
         gameRulesText = new FlxText();
-        gameRulesText.setFormat(18);
+        gameRulesText.setFormat(Registry.FONT_PATH, 18);
         if (Registry.currentGameIndex>=0)
         {
             gameRulesText.text = Registry.gameRules[Registry.currentGameIndex];
