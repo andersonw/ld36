@@ -31,8 +31,8 @@ class KothGameState extends BasicGameState
 
         addSprites();
 
-        var hill:FlxSprite = new FlxSprite(hillX-3, hillY-3);
-        hill.makeGraphic(6, 6, FlxColor.BLUE);
+        var hill:FlxSprite = new FlxSprite(hillX-4, hillY-4);
+        hill.makeGraphic(8, 8, FlxColor.BLUE);
         add(hill);
 
         updateTimeText();
@@ -51,8 +51,8 @@ class KothGameState extends BasicGameState
             player2Time += elapsed;
         }
         updateTimeText();
-        if (player1Time>3) declareWinner(1);
-        else if (player2Time>3) declareWinner(2);
+        if (player1Time>4) declareWinner(1);
+        else if (player2Time>4) declareWinner(2);
     }
 
     public function polygonContainsPoint(polygon:NewPolygonSprite, pointX:Float, pointY:Float):Bool

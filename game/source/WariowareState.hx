@@ -48,6 +48,7 @@ class WariowareState extends FlxState
             FlxG.switchState(new MenuState());
         }
         var minigameIndex:Int = Std.random(Registry.gameList.length);
+        Registry.currentGameIndex = minigameIndex;
         var minigameState:BasicGameState = Registry.gameList[minigameIndex];
         openSubState(minigameState);
     }

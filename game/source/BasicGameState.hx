@@ -39,6 +39,9 @@ class BasicGameState extends FlxSubState
     var timeToGameStart:Float;
     var gameStarted:Bool;
 
+    var gameRulesText:FlxText;
+    var showRules:Bool;
+
     public static inline var ACCELERATION:Float = 0.2;
     public static inline var ANGULAR_ACCELERATION:Float = 0.4;
     public static inline var ANGULAR_DRAG:Float = 0.96;
@@ -91,6 +94,18 @@ class BasicGameState extends FlxSubState
         countdownText.setFormat(20);
         add(countdownText);
         resetCountdown();
+
+        showRules = true;
+
+        gameRulesText = new FlxText();
+        gameRulesText.setFormat(18);
+        if (Registry.currentGameIndex>=0)
+        {
+            gameRulesText.text = Registry.gameRules[Registry.currentGameIndex];
+            gameRulesText.x = (width-gameRulesText.width)/2;
+            gameRulesText.y = 140;
+        }
+        add(gameRulesText);
     }
 
     private function enterPauseMenu():Void{
@@ -153,6 +168,11 @@ class BasicGameState extends FlxSubState
         {
             pause();
             timeToGameStart -= elapsed;
+            if (!showRules)
+            {
+                gameRulesText.visible = false;
+            }
+
             if (timeToGameStart>0)
             {
                 updateCountdownText();
@@ -161,6 +181,7 @@ class BasicGameState extends FlxSubState
             {
                 gameStarted = true;
                 countdownText.visible = false;
+                gameRulesText.visible = false;
                 unpause();
             }
             return;
