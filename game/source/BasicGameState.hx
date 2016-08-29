@@ -97,7 +97,7 @@ class BasicGameState extends FlxSubState
         pauseMenu = false;
 
         pauseScreenText = new FlxText(310, 100, "Paused", 20);
-        pauseScreenText.setFormat(Registry.FONT_PATH);
+        pauseScreenText.setFormat(Registry.FONT_PATH, 20);
         pauseScreenText.x = (width-pauseScreenText.width)/2;
 
         pauseScreenOutline = new FlxSprite(0, 0);
