@@ -195,7 +195,12 @@ class BasicGameState extends FlxState
                         var line = Point.minus(p2, p1);
                         var nvec = new Point(-line.y / line.magnitude(), line.x / line.magnitude());
 
-                        var top = Point.dot(Point.minus(aCenter, bCenter), nvec);
+                        
+                        var diffa = Point.minus(p.rotatedCW(aCenter, aVelocities[a]), p);
+                        var vap = Point.plus(velocities[a], diffa);
+                        var diffb = Point.minus(p.rotatedCW(bCenter, aVelocities[b]), p);
+                        var vbp = Point.plus(velocities[b], diffb);
+                        var top = Point.dot(Point.minus(vap, vbp), nvec);
                         if(top > 0){
                             nvec = new Point(-nvec.x, -nvec.y);
                             top *= -1;
@@ -205,9 +210,9 @@ class BasicGameState extends FlxState
                         var e = 1;
                         var j = Math.abs( (1+e) * top ) / (1/1 + 1/1 + Math.pow(Point.cross(aRad, nvec),2) / (5.0/4 * Math.pow(playSprites[a].RADIUS, 2)) + Math.pow(Point.cross(bRad, nvec),2) / (5.0/4 * Math.pow(playSprites[b].RADIUS, 2)));
 
-                        applyImpulse(a, nvec, -j, aRad);
+                        applyImpulse(a, nvec, j, aRad);
                         // applyImpulse(b, new Point(-nvec.x, -nvec.y), -j, bRad);
-                        applyImpulse(b, nvec, j, new Point(-bRad.x, -bRad.y));
+                        applyImpulse(b, nvec, -j, new Point(-bRad.x, -bRad.y));
 
                         trace(j);
 
@@ -255,11 +260,12 @@ class BasicGameState extends FlxState
     }
 
     private function applyImpulse(ind:Int, n:Point, j:Float, rad:Point){
+        // j /= 60.0;
         trace("     ", aVelocities[ind]);
-        aVelocities[ind] += j / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(rad, n);
+        aVelocities[ind] += j * 180.0/Math.PI / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(rad, n);
         trace(ind, j / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(rad, n));
 
-        var velChange = new Point(n.x * j * Math.PI / 180.0, n.y * j * Math.PI / 180.0);
+        var velChange = new Point(n.x * j, n.y * j);
         velocities[ind] = Point.plus(velocities[ind], velChange);
         trace(velChange.x, velChange.y);
         trace(velocities[ind]);
