@@ -42,7 +42,7 @@ class SumoGameState extends BasicGameState
     public function addSprites():Void
     {
         makeSprite(new NewPolygonSprite(110, 240, Registry.player1Sides, 0, 50, FlxColor.YELLOW), [W, A, S, D]);
-        makeSprite(new NewPolygonSprite(530, 240, Registry.player2Sides, 180, 50, FlxColor.GREEN), [UP, LEFT, DOWN, RIGHT]);
+        makeSprite(new NewPolygonSprite(530, 240, Registry.player2Sides, 180, 50, FlxColor.LIME), [UP, LEFT, DOWN, RIGHT]);
     }
 
     override public function update(elapsed:Float):Void

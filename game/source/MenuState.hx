@@ -16,8 +16,11 @@ class MenuState extends FlxState
         add(buttonTest);
         var buttonSumo = new FlxButtonPlus(270, 200, switchSumo, "Sumo", 100, 20);
         add(buttonSumo);
+        var buttonKoth = new FlxButtonPlus(270, 400, switchKoth, "Koth", 100, 20);
+        add(buttonKoth);
         var buttonFoodRace = new FlxButtonPlus(270, 300, switchFoodRace, "Food Race", 100, 20);
         add(buttonFoodRace);
+
 		super.create();
 	}
 
@@ -31,6 +34,11 @@ class MenuState extends FlxState
         FlxG.switchState(new SumoGameState());
     }
 
+    public function switchKoth():Void
+    {
+        FlxG.switchState(new KothGameState());
+    }
+    
     public function switchFoodRace():Void
     {
         FlxG.switchState(new FoodRaceState());
