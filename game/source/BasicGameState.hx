@@ -10,6 +10,7 @@ import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.addons.ui.FlxButtonPlus;
 import flixel.math.FlxMath;
+import flixel.math.FlxRect;
 import flixel.system.FlxSound;
 import flixel.util.FlxCollision;
 import flixel.util.FlxColor;
@@ -19,6 +20,7 @@ class BasicGameState extends FlxSubState
 {
     public var gameObjects:Array<GameObject>;
     var playSprites:Array<NewPolygonSprite>;
+    var boundingBoxes:Array<FlxRect>;
     var velocities:Array<Point>;
     var aVelocities:Array<Float>;
     var keyLists:Array<Array<FlxKey>>;
@@ -29,13 +31,14 @@ class BasicGameState extends FlxSubState
     var height:Float;
 
     var currentlyColliding:Bool;
+    var currentlyCollidingBoundary:Bool;
 
     var paused:Bool;
     var pauseMenu:Bool;
 
     var pauseScreenOutline:FlxSprite;
-    var pauseScreenContinue:FlxButtonPlus;
-    var pauseScreenBack:FlxButtonPlus;
+    var pauseScreenContinue:BetterButton;
+    var pauseScreenBack:BetterButton;
     var pauseScreenText:FlxText;
 
     //stuff for counting down at the beginning of a level
@@ -80,22 +83,31 @@ class BasicGameState extends FlxSubState
 
         gameObjects = new Array<GameObject>();
         playSprites = new Array<NewPolygonSprite>();
+        boundingBoxes = new Array<FlxRect>();
         velocities = new Array<Point>();
         aVelocities = new Array<Float>();
         keyLists = new Array<Array<FlxKey>>();
         
+        var boundary:FlxRect = new FlxRect(0, 0, width, height);
+        boundingBoxes.push(boundary);
+        currentlyCollidingBoundary = false;
         currentlyColliding = false;
+
         paused = false;
         pauseMenu = false;
 
-        pauseScreenText = new FlxText(100, 100, 1000, "Paused", 20);
+        pauseScreenText = new FlxText(310, 100, "Paused", 20);
+        pauseScreenText.x = (width-pauseScreenText.width)/2;
 
         pauseScreenOutline = new FlxSprite(0, 0);
         pauseScreenOutline.makeGraphic(Math.floor(width), Math.floor(height), FlxColor.WHITE);
         pauseScreenOutline.alpha = 0.3;
 
-        pauseScreenContinue = new FlxButtonPlus(300, 300, exitPauseMenu, "Continue", 100, 20);
-        pauseScreenBack = new FlxButtonPlus(500, 300, backToMenu, "Exit", 100, 20);
+        //pauseScreenContinue = new FlxButtonPlus(300, 300, exitPauseMenu, "Continue", 100, 20);
+        //pauseScreenBack = new FlxButtonPlus(500, 300, backToMenu, "Exit", 100, 20);
+        pauseScreenContinue = new BetterButton(120, 300, 150, 20, "Continue", exitPauseMenu);
+        pauseScreenBack = new BetterButton(370, 300, 150, 20, "Exit", backToMenu);
+
         add(pauseScreenBack);
 
         exitPauseMenu();
@@ -141,7 +153,7 @@ class BasicGameState extends FlxSubState
     }
 
     private function backToMenu():Void{
-        FlxG.switchState(new MenuState());
+        FlxG.switchState(new FinalizedMenuState());
     }
 
     public function resetGame():Void{
@@ -230,12 +242,22 @@ class BasicGameState extends FlxSubState
             {    
                 var sprite:NewPolygonSprite = playSprites[i];
 
+                if(currentlyCollidingBoundary){
+                    trace('etc');
+                    trace(sprite.y);
+                    trace(velocities[i].y*60*elapsed);
+                }
+
                 // apply velocities
                 sprite.x += velocities[i].x * 60 * elapsed;
                 sprite.y += velocities[i].y * 60 * elapsed;
                 sprite.angle += aVelocities[i] * 60 * elapsed;
                 // max velocity in game is around 16. theoretical is 20
                 // max angular velocity in game is around 9. theoretical is 10
+
+                if(currentlyCollidingBoundary){
+                    trace(sprite.y);
+                }
                 
                 // apply drags
                 velocities[i].x *= DRAG;
@@ -252,17 +274,116 @@ class BasicGameState extends FlxSubState
                         velocities[i].subtract(Point.polarPoint(ACCELERATION * 60 * elapsed, Math.PI*sprite.angle/180));
                 }
 
-                // keep sprites within bounds
-                if(sprite.x < 0 && velocities[i].x < 0) velocities[i].x *= -1;
-                if(sprite.x > width && velocities[i].x > 0) velocities[i].x *= -1;
-                if(sprite.y < 0 && velocities[i].y < 0) velocities[i].y *= -1;
-                if(sprite.y > height && velocities[i].y > 0) velocities[i].y *= -1;
+                // // keep sprites within bounds
+                // if(sprite.x < 0 && velocities[i].x < 0) velocities[i].x *= -1;
+                // if(sprite.x > width && velocities[i].x > 0) velocities[i].x *= -1;
+                // if(sprite.y < 0 && velocities[i].y < 0) velocities[i].y *= -1;
+                // if(sprite.y > height && velocities[i].y > 0) velocities[i].y *= -1;
 
             }
 
             checkCollisions();
+            checkAndHandleBoundaryCollisions();
 
         }
+    }
+
+    private function checkAndHandleBoundaryCollisions():Void{
+        var setFalse = true;
+
+        for(i in 0...playSprites.length){
+            for(j in 0...boundingBoxes.length){
+                if(checkAndHandleSpriteBoundaryCollision(i, j))
+                    setFalse = false;
+            }
+        }
+
+        if(setFalse)
+            currentlyCollidingBoundary = false;
+    }
+
+    private function checkAndHandleSpriteBoundaryCollision(a:Int, b:Int):Bool{
+        // get A endppoints
+        var playerASides:Array<FlxSprite> = playSprites[a].members;
+        var playerAEndpoints:Array<Point> = new Array<Point>();
+        for (i in 0...playerASides.length)
+        {
+            var rect:FlxSprite = playerASides[i];
+            var radAngle:Float = rect.angle * Math.PI / 180;
+            var centerX:Float = rect.x + rect.width/2;
+            var centerY:Float = rect.y + rect.height/2;
+            //gets the "left" endpoint of the rectangle
+            playerAEndpoints.push(new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, a));
+        }
+
+        var rect = boundingBoxes[b];
+        var playerBEndPoints:Array<Point> = new Array<Point>();
+        playerBEndPoints.push(new Point(rect.left, rect.top));
+        playerBEndPoints.push(new Point(rect.left, rect.bottom));
+        playerBEndPoints.push(new Point(rect.right, rect.bottom));
+        playerBEndPoints.push(new Point(rect.right, rect.top));
+        playerBEndPoints.push(new Point(rect.left, rect.top));
+
+
+        for(i in 0...playerAEndpoints.length){
+            for(j in 0...4){
+
+                var p = playerAEndpoints[i];
+                var p1 = playerBEndPoints[j];
+                var p2 = playerBEndPoints[j+1];
+
+                if(checkCollidePointAndSegment(p, p1, p2)){
+                    if(!currentlyCollidingBoundary){
+
+                        var aCenter:Point = new Point(playSprites[a].x, playSprites[a].y, a);
+                        // var bCenter:Point = new Point(0.5*(rect.left + rect.right), 0.5*(rect.top + rect.bottom));
+
+                        var aRad:Point = Point.minus(p, aCenter);
+                        // var bRad:Point = Point.minus(p, bCenter);
+                        var velDif = velocities[a];
+
+
+                        var line = Point.minus(p2, p1);
+                        var nvec = new Point(-line.y / line.magnitude(), line.x / line.magnitude());
+
+                        
+                        var diffa = Point.minus(p.rotatedCW(aCenter, aVelocities[a]), p);
+                        var vap = Point.plus(velocities[a], diffa);
+                        var top = Point.dot(vap, nvec);
+                        if(top > 0){
+                            nvec = new Point(-nvec.x, -nvec.y);
+                            top *= -1;
+                        }
+
+                        var e = 1;
+                        // var j = Math.abs( (1+e) * top ) / (1/1 + 1/1 + Math.pow(Point.cross(aRad, nvec),2) / (5.0/4 * Math.pow(playSprites[a].RADIUS, 2)) + Math.pow(Point.cross(bRad, nvec),2) / (5.0/4 * Math.pow(playSprites[b].RADIUS, 2)));
+                        var imp;
+                        // if(j%2 == 0)
+                        //     imp = Math.abs(velocities[a].x);
+                        // else
+                        //     imp = Math.abs(velocities[a].y);
+                        imp = -top;
+
+                        // trace(nvec);
+                        // trace(p);
+                        // trace('avel', aVelocities[a]);
+                        applyImpulse(a, nvec, 2*imp, aRad);
+                        // trace(imp);
+
+                        // if(checkCollidePointAndSegment(p, p1, p2))
+                            // trace('fuck');
+                    }
+
+                    currentlyCollidingBoundary = true;
+                    return true;
+
+                }
+
+            }
+        }
+
+        return false;
+
     }
 
     private function checkCollisions():Void
@@ -362,7 +483,11 @@ class BasicGameState extends FlxSubState
         aVelocities[ind] += j * 180.0/Math.PI / (5.0/4 * Math.pow(playSprites[ind].RADIUS, 2)) * Point.cross(rad, n);
 
         var velChange = new Point(n.x * j, n.y * j);
+        // trace('vb',velocities[ind]);
         velocities[ind] = Point.plus(velocities[ind], velChange);
+        // trace(velChange.x, velChange.y);
+        // trace('va',velocities[ind]);
+
     }
 
     private function checkCollidePointAndSegment(p:Point, p1:Point, p2:Point):Bool{
@@ -374,8 +499,8 @@ class BasicGameState extends FlxSubState
         var newp2 = getUpdatedPoint(p2);
         var newd = getDiscriminant(newp, newp1, newp2);
 
-        var tolDiscrim = 0.5;
-        if(currd * newd > 0 - tolDiscrim)
+        var tolDiscrim = 0;
+        if(currd * newd > 0 + tolDiscrim)
             return false;
         else if(Math.abs(currd*newd) < 1){
             trace(currd*newd);
@@ -452,6 +577,8 @@ class BasicGameState extends FlxSubState
         var numFrames = 1.5;
 
         var i = p.polyInd;
+        if(i < 0)
+            return p;
 
         // update by velocity
         var newp:Point = Point.plus(p, velocities[i].scale(numFrames));
@@ -500,4 +627,5 @@ class BasicGameState extends FlxSubState
     {
         paused = false;
     }
+
 }

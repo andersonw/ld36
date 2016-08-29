@@ -20,8 +20,8 @@ class TestState extends BasicGameState
 
         // + Math.floor(Math.random()*7)
 
-		makeSprite(new NewPolygonSprite(25, 25, 3, 10, 100), [W, A, S, D]);
-		makeSprite(new NewPolygonSprite(400, 400, 3, 74, 100), [UP, LEFT, DOWN, RIGHT]);
+		makeSprite(new NewPolygonSprite(70, 70, 3, 10, 50), [W, A, S, D]);
+		makeSprite(new NewPolygonSprite(400, 400, 3, 74, 50), [UP, LEFT, DOWN, RIGHT]);
 	}
 
 	override public function update(elapsed:Float):Void
