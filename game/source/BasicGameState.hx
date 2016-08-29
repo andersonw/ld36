@@ -34,8 +34,8 @@ class BasicGameState extends FlxSubState
     var pauseMenu:Bool;
 
     var pauseScreenOutline:FlxSprite;
-    var pauseScreenContinue:FlxButtonPlus;
-    var pauseScreenBack:FlxButtonPlus;
+    var pauseScreenContinue:BetterButton;
+    var pauseScreenBack:BetterButton;
     var pauseScreenText:FlxText;
 
     //stuff for counting down at the beginning of a level
@@ -88,14 +88,18 @@ class BasicGameState extends FlxSubState
         paused = false;
         pauseMenu = false;
 
-        pauseScreenText = new FlxText(100, 100, 1000, "Paused", 20);
+        pauseScreenText = new FlxText(310, 100, "Paused", 20);
+        pauseScreenText.x = (width-pauseScreenText.width)/2;
 
         pauseScreenOutline = new FlxSprite(0, 0);
         pauseScreenOutline.makeGraphic(Math.floor(width), Math.floor(height), FlxColor.WHITE);
         pauseScreenOutline.alpha = 0.3;
 
-        pauseScreenContinue = new FlxButtonPlus(300, 300, exitPauseMenu, "Continue", 100, 20);
-        pauseScreenBack = new FlxButtonPlus(500, 300, backToMenu, "Exit", 100, 20);
+        //pauseScreenContinue = new FlxButtonPlus(300, 300, exitPauseMenu, "Continue", 100, 20);
+        //pauseScreenBack = new FlxButtonPlus(500, 300, backToMenu, "Exit", 100, 20);
+        pauseScreenContinue = new BetterButton(120, 300, 150, 20, "Continue", exitPauseMenu);
+        pauseScreenBack = new BetterButton(370, 300, 150, 20, "Exit", backToMenu);
+
         add(pauseScreenBack);
 
         exitPauseMenu();
@@ -141,7 +145,7 @@ class BasicGameState extends FlxSubState
     }
 
     private function backToMenu():Void{
-        FlxG.switchState(new MenuState());
+        FlxG.switchState(new FinalizedMenuState());
     }
 
     public function resetGame():Void{
