@@ -14,44 +14,100 @@ import flixel.input.keyboard.FlxKey;
 class FoodRaceState extends BasicGameState
 {
 	public var foodSprite:FlxSprite;
+	public var foodI:Int;
+	public var foodX:Array<Float>;
+	public var foodY:Array<Float>;
+
+	public var playerTexts:Array<FlxText>;
+
+	public var p1Text:FlxText;
+	public var p2Text:FlxText;
+	public var winText:FlxText;
+
+	public var winPlayer:Int;
+
 	public static inline var FOOD_WIDTH:Float = 10;
-	public var foodX:Float;
-	public var foodY:Float;
-	public var possibleX:Array<Float>;
-	public var possibleY:Array<Float>;
-	public var possibleLocs:Array<Point>;
+	public static inline var SPAWNER_WIDTH:Float = 4;
+	public static inline var WINNING_SIDES:Int = 12;
+
 	override public function create():Void
 	{
 		super.create();
-        foodX = width/2;
-        foodY = height/2;
-        possibleX = new Array<Float>();
-        possibleX = [width/4,	3*width/4,	width/4,	3*width/4,	width/2];
-        possibleY = new Array<Float>();
-        possibleY = [height/4,	height/4,	3*height/4,	3*height/4,	height/2];
-        foodSprite = new FlxSprite(foodX - FOOD_WIDTH/2, foodY - FOOD_WIDTH/2);
+        foodI = 4;
+        foodX = new Array<Float>();
+        foodX = [width/4,	3*width/4,	width/4,	3*width/4,	width/2];
+        foodY = new Array<Float>();
+        foodY = [height/4,	height/4,	3*height/4,	3*height/4,	height/2];
+
+        winPlayer = -1;
+
+        playerTexts = new Array<FlxText>();
+
+        makePlayerText(55, 55, FlxColor.YELLOW);
+        makePlayerText(width-55, 55, FlxColor.LIME);
+
+        winText = new FlxText(width/2, 55, 20);
+        winText.size = 20;
+        winText.color = FlxColor.WHITE;
+        add(winText);
+
+
+        for(i in 0...foodX.length){
+			var sprite = new FlxSprite(foodX[i] - SPAWNER_WIDTH/2, foodY[i] - SPAWNER_WIDTH/2);
+			sprite.makeGraphic(SPAWNER_WIDTH, SPAWNER_WIDTH, FlxColor.BLUE);
+			add(sprite);
+		}
+
+        foodSprite = new FlxSprite(foodX[foodI] - FOOD_WIDTH/2, foodY[foodI] - FOOD_WIDTH/2);
         foodSprite.makeGraphic(FOOD_WIDTH, FOOD_WIDTH, FlxColor.GREEN);
         add(foodSprite);
-		makeSprite(new NewPolygonSprite(25, 25, 3 + Math.floor(Math.random()*7), 10, 25), [W, A, S, D]);
-		makeSprite(new NewPolygonSprite(400, 400, 3, 74, 25), [UP, LEFT, DOWN, RIGHT]);
+
+		makeSprite(new NewPolygonSprite(width/4, height/2, 3, 0, 25, FlxColor.YELLOW), [W, A, S, D]);
+		makeSprite(new NewPolygonSprite(3*width/4, height/2, 3, 180, 25, FlxColor.LIME), [UP, LEFT, DOWN, RIGHT]);
+	}
+
+	private function makePlayerText(x:Float, y:Float, c:FlxColor):Int{
+		var ret:Int = playerTexts.length;
+		playerTexts.push(new FlxText(x, y));
+		playerTexts[ret].size = 20;
+		playerTexts[ret].color = c;
+		playerTexts[ret].text = "3";
+		add(playerTexts[ret]);
+		return ret;
 	}
 
 	override public function update(elapsed:Float):Void
 	{
-		var i:Int =  0;
-		for(sprite in playSprites){
+		if(winPlayer >= 0) pause();
+		for(i in 0...playSprites.length){
+			var sprite = playSprites[i];
 			for(rect in sprite){
-				if(BasicGameState.distanceFromPointToRect(new Point(foodX, foodY), rect) < 10){
+				if(BasicGameState.distanceFromPointToRect(new Point(foodX[foodI], foodY[foodI]), rect) < 10){
 					trace("Player " + i + " got the food!");
-					var i:Int = Math.floor(Math.random() * 5);
-					foodX = possibleX[i];
-					foodY = possibleY[i];
+					var newFoodI:Int = Math.floor(Math.random() * (foodX.length-1));
+					foodI = newFoodI + (newFoodI >= foodI ? 1 : 0);
+					trace(foodI);
+
+					var oldSprite = playSprites[i];
+					playSprites[i] = new NewPolygonSprite(oldSprite.x, oldSprite.y, oldSprite.numSides+1, oldSprite.angle, oldSprite.RADIUS, oldSprite.color);
+					remove(oldSprite);
+					oldSprite.destroy();
+					add(playSprites[i]);
+
+					playerTexts[i].text = "" + playSprites[i].numSides;
+
+					if(playSprites[i].numSides >= WINNING_SIDES && winPlayer < 0){
+						winPlayer = i;
+						winText.text = "Player " + (winPlayer+1) + " won!";
+						winText.color = playerTexts[i].color;
+					}
 				}
 			}
-			i += 1;
 		}
-		foodSprite.x = foodX - FOOD_WIDTH/2;
-		foodSprite.y = foodY - FOOD_WIDTH/2;
+
+		foodSprite.x = foodX[foodI] - FOOD_WIDTH/2;
+		foodSprite.y = foodY[foodI] - FOOD_WIDTH/2;
+
         super.update(elapsed);
 	}
  }

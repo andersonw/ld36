@@ -222,18 +222,18 @@ class BasicGameState extends FlxState
         var newp2 = getUpdatedPoint(p2);
         var newd = getDiscriminant(newp, newp1, newp2);
 
-        if(aVelocities[1] > 5){
-            trace('begin');
-            trace(aVelocities[1]);
+        //if(aVelocities[1] > 5){
+            //trace('begin');
+            //trace(aVelocities[1]);
             // trace(distanceFromPointToSegment(p.x, p.y, p1.x, p1.y, p2.x, p2.y));
-            trace(currd, newd);
-            trace(p.x, p.y);
-            trace(newp.x, newp.y);
+            //trace(currd, newd);
+            //trace(p.x, p.y);
+            //trace(newp.x, newp.y);
             // trace(p1.x, p1.y);
             // trace(p2.x, p2.y);
             // trace(newp1.x, newp1.y);
             // trace(newp2.x, newp2.y);
-        }
+        //}
 
         if(currd * newd > 0)
             return false;
