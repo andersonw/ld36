@@ -12,16 +12,12 @@ class MenuState extends FlxState
 {
 	override public function create():Void
 	{
-        var buttonTest = new FlxButtonPlus(270, 100, switchTest, "Test", 100, 20);
-        add(buttonTest);
-        var buttonSumo = new FlxButtonPlus(270, 200, switchSumo, "Sumo", 100, 20);
-        add(buttonSumo);
-        var buttonKoth = new FlxButtonPlus(270, 400, switchKoth, "Koth", 100, 20);
-        add(buttonKoth);
-        var buttonFoodRace = new FlxButtonPlus(270, 300, switchFoodRace, "Food Race", 100, 20);
-        add(buttonFoodRace);
-        var buttonFoodRace = new FlxButtonPlus(270, 450, startMinigames, "Start the game!", 100, 20);
-        add(buttonFoodRace);
+        add(new FlxButtonPlus(270, 100, switchTest, "Test", 100, 20));
+        add(new FlxButtonPlus(270, 200, switchSumo, "Sumo", 100, 20));
+        add(new FlxButtonPlus(270, 400, switchKoth, "Koth", 100, 20));
+        add(new FlxButtonPlus(270, 300, switchFoodRace, "Food Race", 100, 20));
+        add(new FlxButtonPlus(270, 450, startMinigames, "Start the game!", 100, 20));
+        add(new FlxButtonPlus(100, 100, startRace, "Race Laps", 100, 20));
 
 		super.create();
 	}
@@ -49,6 +45,11 @@ class MenuState extends FlxState
     public function startMinigames():Void
     {
         FlxG.switchState(new WariowareState());
+    }
+
+    public function startRace():Void
+    {
+        FlxG.switchState(new LapRaceState());
     }
 
 	override public function update(elapsed:Float):Void

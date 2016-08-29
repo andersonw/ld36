@@ -39,37 +39,10 @@ class SumoGameState extends BasicGameState
     override public function update(elapsed:Float):Void
     {
         super.update(elapsed);
-
-        if (isPlayerDead(0))
-        {
-            //checks whether this is being part of some minigame
-            if (_parentState == null)
-            {
-                trace("Player 2 wins!");
-                Registry.player2Sides += 1;
-                resetGame();
-            }
-            else
-            {
-                Registry.currentMinigameWinner = 2;
-                close();
-            }
-        }
-        else if (isPlayerDead(1))
-        {
-            if (_parentState == null)
-            {
-                trace("Player 1 wins!");
-                Registry.player1Sides += 1;
-                resetGame();
-            }
-            else
-            {
-                Registry.currentMinigameWinner = 1;
-                close();
-            }
-        }
+        if (isPlayerDead(0)) declareWinner(2);
+        else if (isPlayerDead(1)) declareWinner(1);
     }
+
     //extremely simple right now, maybe we want to check if the edges themselves are outside the box
     public function isPlayerDead(playerNum:Int):Bool
     {
@@ -84,17 +57,9 @@ class SumoGameState extends BasicGameState
         return false;
     }
 
-    public function resetGame():Void
+    public override function resetGame():Void
     {
-        for (sprite in playSprites)
-        {
-            sprite.destroy();
-        }
-        playSprites = new Array<NewPolygonSprite>();
-        velocities = new Array<Point>();
-        aVelocities = new Array<Float>();
-        keyLists = new Array<Array<FlxKey>>();
+        super.resetGame();
         addSprites();
-        resetCountdown();
     }
 }

@@ -20,6 +20,6 @@ class Registry
 
     public static function resetGameList():Void
     {
-        gameList = [new SumoGameState(), new KothGameState()];
+        gameList = [new SumoGameState(), new KothGameState(), new FoodRaceState(), new LapRaceState()];
     }
 }

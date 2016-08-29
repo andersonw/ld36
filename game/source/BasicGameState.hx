@@ -113,6 +113,33 @@ class BasicGameState extends FlxSubState
         FlxG.switchState(new MenuState());
     }
 
+    public function resetGame():Void{
+        for (sprite in playSprites)
+        {
+            sprite.destroy();
+        }
+        playSprites = new Array<NewPolygonSprite>();
+        velocities = new Array<Point>();
+        aVelocities = new Array<Float>();
+        keyLists = new Array<Array<FlxKey>>();
+        resetCountdown();
+    } //override to reset game
+
+    public function declareWinner(winner:Int):Void{
+        if (_parentState == null)
+        {
+            trace("Player " + winner + " wins!");
+            if(winner == 1) Registry.player1Sides += 1;
+            else Registry.player2Sides += 1;
+            resetGame();
+        }
+        else
+        {
+            Registry.currentMinigameWinner = winner;
+            close();
+        }
+    }
+
     override public function update(elapsed:Float):Void
     {
         // TODO: adjust how drag works with frame rate

@@ -51,34 +51,8 @@ class KothGameState extends BasicGameState
             player2Time += elapsed;
         }
         updateTimeText();
-        if (player1Time>3)
-        {
-            if (_parentState == null)
-            {
-                trace("Player 1 wins!");
-                Registry.player1Sides += 1;
-                resetGame();
-            }
-            else
-            {
-                Registry.currentMinigameWinner = 1;
-                close();
-            }
-        }
-        else if (player2Time>3)
-        {
-            if (_parentState == null)
-            {
-                trace("Player 2 wins!");
-                Registry.player2Sides += 1;
-                resetGame();
-            }
-            else
-            {
-                Registry.currentMinigameWinner = 2;
-                close();
-            }
-        }
+        if (player1Time>3) declareWinner(1);
+        else if (player2Time>3) declareWinner(2);
     }
 
     public function polygonContainsPoint(polygon:NewPolygonSprite, pointX:Float, pointY:Float):Bool
@@ -127,18 +101,10 @@ class KothGameState extends BasicGameState
         return numString;
     }
 
-    public function resetGame():Void
+    public override function resetGame():Void
     {
-        for (sprite in playSprites)
-        {
-            sprite.destroy();
-        }
-        playSprites = new Array<NewPolygonSprite>();
-        velocities = new Array<Point>();
-        aVelocities = new Array<Float>();
-        keyLists = new Array<Array<FlxKey>>();
+        super.resetGame();
         addSprites();
-        resetCountdown();
         player1Time = 0;
         player2Time = 0;
         updateTimeText();
