@@ -20,6 +20,8 @@ class MenuState extends FlxState
         add(buttonKoth);
         var buttonFoodRace = new FlxButtonPlus(270, 300, switchFoodRace, "Food Race", 100, 20);
         add(buttonFoodRace);
+        var buttonFoodRace = new FlxButtonPlus(270, 450, startMinigames, "Start the game!", 100, 20);
+        add(buttonFoodRace);
 
 		super.create();
 	}
@@ -38,10 +40,15 @@ class MenuState extends FlxState
     {
         FlxG.switchState(new KothGameState());
     }
-    
+
     public function switchFoodRace():Void
     {
         FlxG.switchState(new FoodRaceState());
+    }
+
+    public function startMinigames():Void
+    {
+        FlxG.switchState(new WariowareState());
     }
 
 	override public function update(elapsed:Float):Void

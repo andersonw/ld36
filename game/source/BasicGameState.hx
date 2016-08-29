@@ -5,6 +5,7 @@ import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.FlxSubState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.math.FlxMath;
@@ -12,7 +13,7 @@ import flixel.util.FlxCollision;
 import flixel.util.FlxColor;
 import flixel.input.keyboard.FlxKey;
 
-class BasicGameState extends FlxState
+class BasicGameState extends FlxSubState
 {
     var playSprites:Array<NewPolygonSprite>;
     var velocities:Array<Point>;

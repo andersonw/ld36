@@ -32,8 +32,8 @@ class SumoGameState extends BasicGameState
 
     public function addSprites():Void
     {
-        makeSprite(new NewPolygonSprite(110, 240, Registry.player1Sides, 0, 50, FlxColor.YELLOW), [W, A, S, D]);
-        makeSprite(new NewPolygonSprite(530, 240, Registry.player2Sides, 180, 50, FlxColor.LIME), [UP, LEFT, DOWN, RIGHT]);
+        makeSprite(new NewPolygonSprite(110, 240, Registry.player1Sides, 0, 50, Registry.player1Color), [W, A, S, D]);
+        makeSprite(new NewPolygonSprite(530, 240, Registry.player2Sides, 180, 50, Registry.player2Color), [UP, LEFT, DOWN, RIGHT]);
     }
 
     override public function update(elapsed:Float):Void
@@ -42,15 +42,32 @@ class SumoGameState extends BasicGameState
 
         if (isPlayerDead(0))
         {
-            trace("Player 2 wins!");
-            Registry.player2Sides += 1;
-            resetGame();
+            //checks whether this is being part of some minigame
+            if (_parentState == null)
+            {
+                trace("Player 2 wins!");
+                Registry.player2Sides += 1;
+                resetGame();
+            }
+            else
+            {
+                Registry.currentMinigameWinner = 2;
+                close();
+            }
         }
         else if (isPlayerDead(1))
         {
-            trace("Player 1 wins!");
-            Registry.player1Sides += 1;
-            resetGame();
+            if (_parentState == null)
+            {
+                trace("Player 1 wins!");
+                Registry.player1Sides += 1;
+                resetGame();
+            }
+            else
+            {
+                Registry.currentMinigameWinner = 1;
+                close();
+            }
         }
     }
     //extremely simple right now, maybe we want to check if the edges themselves are outside the box

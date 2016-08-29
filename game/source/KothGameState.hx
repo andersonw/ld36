@@ -23,9 +23,9 @@ class KothGameState extends BasicGameState
         player1Time = 0;
         player2Time = 0;
         player1TimeText = new FlxText();
-        player1TimeText.setFormat(20, FlxColor.YELLOW);
+        player1TimeText.setFormat(20, Registry.player1Color);
         player2TimeText = new FlxText();
-        player2TimeText.setFormat(20, FlxColor.LIME);
+        player2TimeText.setFormat(20, Registry.player2Color);
         add(player1TimeText);
         add(player2TimeText);
 
@@ -51,17 +51,33 @@ class KothGameState extends BasicGameState
             player2Time += elapsed;
         }
         updateTimeText();
-        if (player1Time>5)
+        if (player1Time>3)
         {
-            trace("Player 1 wins!");
-            Registry.player1Sides += 1;
-            resetGame();
+            if (_parentState == null)
+            {
+                trace("Player 1 wins!");
+                Registry.player1Sides += 1;
+                resetGame();
+            }
+            else
+            {
+                Registry.currentMinigameWinner = 1;
+                close();
+            }
         }
-        else if (player2Time>5)
+        else if (player2Time>3)
         {
-            trace("Player 2 wins!");
-            Registry.player2Sides += 1;
-            resetGame();
+            if (_parentState == null)
+            {
+                trace("Player 2 wins!");
+                Registry.player2Sides += 1;
+                resetGame();
+            }
+            else
+            {
+                Registry.currentMinigameWinner = 2;
+                close();
+            }
         }
     }
 
@@ -97,8 +113,8 @@ class KothGameState extends BasicGameState
 
     public function addSprites():Void
     {
-        makeSprite(new NewPolygonSprite(60, 240, Registry.player1Sides, 0, 50, FlxColor.YELLOW), [W, A, S, D]);
-        makeSprite(new NewPolygonSprite(580, 240, Registry.player2Sides, 180, 50, FlxColor.LIME), [UP, LEFT, DOWN, RIGHT]);
+        makeSprite(new NewPolygonSprite(60, 240, Registry.player1Sides, 0, 50, Registry.player1Color), [W, A, S, D]);
+        makeSprite(new NewPolygonSprite(580, 240, Registry.player2Sides, 180, 50, Registry.player2Color), [UP, LEFT, DOWN, RIGHT]);
     }
 
     public function roundNum(num:Float, decimalPlaces:Int):String
