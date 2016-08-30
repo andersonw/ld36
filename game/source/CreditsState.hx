@@ -3,6 +3,7 @@ package;
 import flixel.FlxG;
 import flixel.FlxState;
 import flixel.text.FlxText;
+import flixel.util.FlxColor;
 
 class CreditsState extends FlxState
 {
@@ -11,9 +12,9 @@ class CreditsState extends FlxState
 
     override public function create():Void
     {
-        creditsText = new FlxText();
+        creditsText = new FlxText((FlxG.width-creditsText.width)/2, 100, 1000, 13);
         creditsText.text = "Force of Wheel was made for Ludum Dare 36\n Programmed by Phillip Ai, Max Murin, and Anderson Wang\n Created with HaxeFlixel, sound effects made with bfxr";
-        creditsText.setFormat(Registry.FONT_PATH, 13, CENTER);
+        creditsText.setFormat(Registry.FONT_PATH, 13, FlxColor.WHITE, CENTER);
         creditsText.x = (FlxG.width-creditsText.width)/2;
         creditsText.y = 100;
         backButton = new BetterButton(270, 300, 100, 40, "Back", 18, switchMenu);

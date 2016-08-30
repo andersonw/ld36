@@ -96,7 +96,7 @@ class BasicGameState extends FlxSubState
         paused = false;
         pauseMenu = false;
 
-        pauseScreenText = new FlxText(310, 100, "Paused", 20);
+        pauseScreenText = new FlxText(310, 100, 1000, "Paused", 20);
         pauseScreenText.setFormat(Registry.FONT_PATH, 20);
         pauseScreenText.x = (width-pauseScreenText.width)/2;
 
@@ -106,8 +106,8 @@ class BasicGameState extends FlxSubState
 
         //pauseScreenContinue = new FlxButtonPlus(300, 300, exitPauseMenu, "Continue", 100, 20);
         //pauseScreenBack = new FlxButtonPlus(500, 300, backToMenu, "Exit", 100, 20);
-        pauseScreenContinue = new BetterButton(120, 300, 150, 20, "Continue", exitPauseMenu);
-        pauseScreenBack = new BetterButton(370, 300, 150, 20, "Exit", backToMenu);
+        pauseScreenContinue = new BetterButton(120, 300, 150, 20, "Continue", 16, exitPauseMenu);
+        pauseScreenBack = new BetterButton(370, 300, 150, 20, "Exit", 16, backToMenu);
 
         add(pauseScreenBack);
 
