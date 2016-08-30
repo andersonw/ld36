@@ -174,7 +174,7 @@ class BasicGameState extends FlxSubState
         
         // handle loser
         var loser = (3-winner)-1;
-        trace(loser);
+        // trace(loser);
         if (_parentState == null)
         {
             Registry.currentMinigameWinner = winner;
@@ -243,11 +243,11 @@ class BasicGameState extends FlxSubState
             {    
                 var sprite:NewPolygonSprite = playSprites[i];
 
-                if(currentlyCollidingBoundary){
-                    trace('etc');
-                    trace(sprite.y);
-                    trace(velocities[i].y*60*elapsed);
-                }
+                // if(currentlyCollidingBoundary){
+                //     trace('etc');
+                //     trace(sprite.y);
+                //     trace(velocities[i].y*60*elapsed);
+                // }
 
                 // apply velocities
                 sprite.x += velocities[i].x * 60 * elapsed;
@@ -256,9 +256,9 @@ class BasicGameState extends FlxSubState
                 // max velocity in game is around 16. theoretical is 20
                 // max angular velocity in game is around 9. theoretical is 10
 
-                if(currentlyCollidingBoundary){
-                    trace(sprite.y);
-                }
+                // if(currentlyCollidingBoundary){
+                //     trace(sprite.y);
+                // }
                 
                 // apply drags
                 velocities[i].x *= DRAG;
@@ -504,16 +504,22 @@ class BasicGameState extends FlxSubState
         if(currd * newd > 0 + tolDiscrim)
             return false;
         else if(Math.abs(currd*newd) < 1){
-            trace(currd*newd);
+            // trace(currd*newd);
         }
 
         var dif:Point = Point.minus(p2, p1);
 
         var onSegment = Point.dot(Point.minus(p, p1), dif) / Point.dot(dif, dif);
-        var tolerance = 0.07;
-        if(onSegment >= 0-tolerance && onSegment <= 1+tolerance){
+        // var tolerance = 0.07;
+        var tolerancePix = 3;
+        var osval = (Math.abs(onSegment - 0.5) - 0.5) * Point.dot(dif,dif);
+        if(osval < tolerancePix){
             return true;
         }
+        // if(onSegment >= 0-tolerance && onSegment <= 1+tolerance){
+        //     return true;
+        // }
+
         return false;
     }
 

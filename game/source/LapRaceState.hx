@@ -8,6 +8,7 @@ import flixel.FlxState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.math.FlxMath;
+import flixel.math.FlxRect;
 import flixel.system.FlxSound;
 import flixel.util.FlxCollision;
 import flixel.util.FlxColor;
@@ -38,6 +39,8 @@ class LapRaceState extends BasicGameState
         super.create();
 
         centerBumper.makeGraphic(Math.floor(width-2*LANE_WIDTH), Math.floor(height-2*LANE_WIDTH), FlxColor.BLUE);
+
+        boundingBoxes.push(new FlxRect(LANE_WIDTH, LANE_WIDTH, Math.floor(width-2*LANE_WIDTH), Math.floor(height-2*LANE_WIDTH)));
 
         // + Math.floor(Math.random()*7)
 
@@ -114,13 +117,13 @@ class LapRaceState extends BasicGameState
 	{
         for(i in 0...playSprites.length){
             var sprite = playSprites[i];
-            if(sprite.x > centerBumper.x && sprite.x < centerBumper.x + centerBumper.width &&
-                sprite.y > centerBumper.y && sprite.y < centerBumper.y + centerBumper.height){
-                if(sprite.x < centerBumper.x + BUMPER_TOLERANCE && velocities[i].x > 0) velocities[i].x *= -1;
-                if(sprite.x > centerBumper.x + centerBumper.width - BUMPER_TOLERANCE && velocities[i].x < 0) velocities[i].x *= -1;
-                if(sprite.y < centerBumper.y + BUMPER_TOLERANCE && velocities[i].y > 0) velocities[i].y *= -1;
-                if(sprite.y > centerBumper.y + centerBumper.height - BUMPER_TOLERANCE && velocities[i].y < 0) velocities[i].y *= -1;
-            }
+            // if(sprite.x > centerBumper.x && sprite.x < centerBumper.x + centerBumper.width &&
+            //     sprite.y > centerBumper.y && sprite.y < centerBumper.y + centerBumper.height){
+            //     if(sprite.x < centerBumper.x + BUMPER_TOLERANCE && velocities[i].x > 0) velocities[i].x *= -1;
+            //     if(sprite.x > centerBumper.x + centerBumper.width - BUMPER_TOLERANCE && velocities[i].x < 0) velocities[i].x *= -1;
+            //     if(sprite.y < centerBumper.y + BUMPER_TOLERANCE && velocities[i].y > 0) velocities[i].y *= -1;
+            //     if(sprite.y > centerBumper.y + centerBumper.height - BUMPER_TOLERANCE && velocities[i].y < 0) velocities[i].y *= -1;
+            // }
 
             var advanceLaneMarker:Bool = false;
             switch(currentLaneMarker[i]){
