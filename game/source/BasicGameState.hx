@@ -511,11 +511,15 @@ class BasicGameState extends FlxSubState
 
         var onSegment = Point.dot(Point.minus(p, p1), dif) / Point.dot(dif, dif);
         // var tolerance = 0.07;
-        var tolerancePix = 3;
-        var osval = (Math.abs(onSegment - 0.5) - 0.5) * Point.dot(dif,dif);
-        if(osval < tolerancePix){
+        var tolerancePix = 7;
+        var osval = (Math.abs(onSegment - 0.5) - 0.5);
+        if(osval * dif.magnitude() < tolerancePix){
             return true;
         }
+        // if(osval < 0.1){
+        //     trace(osval, dif.magnitude());
+        // }
+        // trace(osval);
         // if(onSegment >= 0-tolerance && onSegment <= 1+tolerance){
         //     return true;
         // }
