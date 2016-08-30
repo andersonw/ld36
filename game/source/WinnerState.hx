@@ -71,6 +71,7 @@ class WinnerState extends FlxSubState
         winnerText = new FlxText(0, h/4, 500, "Player " + Registry.currentMinigameWinner + " is the winner!\nSpace to continue", 20);
         winnerText.visible = false;
         winnerText.alignment = CENTER;
+        winnerText.setFormat(Registry.FONT_PATH, 30);
         add(winnerText);
         if(Registry.currentMinigameWinner == 1) Registry.player1Sides += 1;
         else Registry.player2Sides += 1;
