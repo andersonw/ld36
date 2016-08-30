@@ -12,7 +12,6 @@ import flixel.math.FlxMath;
 class FinalizedMenuState extends FlxState
 {
     var titleText:FlxText;
-    public static inline var FONT_PATH = "/assets/ponderosa.ttf";
 
     var menuPolygon:NewPolygonSprite;
     var menuPolygon2:NewPolygonSprite;
@@ -24,7 +23,7 @@ class FinalizedMenuState extends FlxState
     {
         titleText = new FlxText();
         titleText.text = "F RCE  F WHEEL";
-        titleText.setFormat(FONT_PATH, 55);
+        titleText.setFormat(Registry.FONT_PATH, 55);
         titleText.x = (FlxG.width-titleText.width)/2;
         titleText.y = 20;
         add(titleText);

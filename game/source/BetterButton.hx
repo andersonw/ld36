@@ -27,9 +27,10 @@ class BetterButton extends FlxTypedGroup<FlxSprite>
         buttonRect.makeGraphic(cast width, cast height, FlxColor.BLACK);
         buttonText = new FlxText(x+width/2, y+height/2);
         buttonText.text = text;
+        buttonText.setFormat(Registry.FONT_PATH, fontSize);
         buttonText.x = x+width/2-buttonText.width/2;
         buttonText.y = y+height/2-buttonText.height/2;
-        buttonText.setFormat(Registry.FONT_PATH, fontSize);
+
         add(buttonBorder);
         add(buttonRect);
         add(buttonText);
