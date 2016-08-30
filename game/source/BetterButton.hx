@@ -17,7 +17,7 @@ class BetterButton extends FlxTypedGroup<FlxSprite>
     var hovered:Bool;
     var pressed:Bool;
 
-    override public function new(x:Float=0, y:Float=0, width:Float=0, height:Float=0, text:String="", fontSize:Int = 16, ?onClick:Void->Void)
+    override public function new(x:Float=0, y:Float=0, width:Float=0, height:Float=0, text:String="a", fontSize:Int = 16, onClick:Void->Void)
     {
         super();
 
@@ -25,9 +25,10 @@ class BetterButton extends FlxTypedGroup<FlxSprite>
         buttonBorder.makeGraphic(cast width+2, cast height+2, FlxColor.WHITE);
         buttonRect = new FlxSprite(x, y);
         buttonRect.makeGraphic(cast width, cast height, FlxColor.BLACK);
-        buttonText = new FlxText(x+width/2, y+height/2, 1000, text);
-        buttonText.x -= buttonText.width/2;
-        buttonText.y -= buttonText.height/2;
+        buttonText = new FlxText(x+width/2, y+height/2);
+        buttonText.text = text;
+        buttonText.x = x+width/2-buttonText.width/2;
+        buttonText.y = y+height/2-buttonText.height/2;
         buttonText.setFormat(Registry.FONT_PATH, fontSize);
         add(buttonBorder);
         add(buttonRect);

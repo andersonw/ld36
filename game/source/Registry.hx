@@ -23,7 +23,7 @@ class Registry
     //used for winner state
     public static var currentPlayerData:PlayerData;
 
-    public static inline var FONT_PATH = "/assets/ponderosa.ttf";
+    public static inline var FONT_PATH = AssetPaths.ponderosa__ttf;
     public static function resetGameList():Void
     {
         gameList = [new SumoGameState(), new KothGameState(), new FoodRaceState(), new LapRaceState()];
