@@ -9,6 +9,7 @@ import flixel.ui.FlxButton;
 import flixel.math.FlxMath;
 import flixel.FlxSubState;
 import flixel.util.FlxColor;
+import flixel.system.FlxSound;
 
 class GameOverState extends FlxSubState
 {
@@ -41,6 +42,7 @@ class GameOverState extends FlxSubState
     var wina:Float;
 
     var angleV:Float;
+    var explodeSound:FlxSound;
 
 	override public function create():Void
 	{
@@ -54,6 +56,7 @@ class GameOverState extends FlxSubState
         w = data.w;
         h = data.h;
         r = data.r;
+        explodeSound = FlxG.sound.load(AssetPaths.explosion__wav);
 
         angleV = 0;
 
@@ -82,7 +85,7 @@ class GameOverState extends FlxSubState
         }
         add(winner);
         add(loser);
-        winnerText = new FlxText(50, h/4, 500, "Player " + Registry.currentMinigameWinner + " became a wheel!\nSpace to continue", 20);
+        winnerText = new FlxText(50, h/4, 500, "Player " + Registry.currentMinigameWinner + " became a wheel and is the winner!\nSpace to return to menu", 20);
         winnerText.visible = false;
         winnerText.alignment = CENTER;
         winnerText.setFormat(Registry.FONT_PATH, 20);
@@ -97,6 +100,7 @@ class GameOverState extends FlxSubState
         flashCover.makeGraphic(cast w, cast h, FlxColor.WHITE);
         flashCover.alpha = 0;
         loser.explode();
+        explodeSound.play();
 	}
 
     override public function update(elapsed:Float):Void
@@ -146,7 +150,7 @@ class GameOverState extends FlxSubState
             }
         }else{
             if(FlxG.keys.anyPressed([SPACE])){
-                FlxG.switchState(new MenuState());
+                FlxG.switchState(new FinalizedMenuState());
             }
         }
         moveTimer += elapsed;

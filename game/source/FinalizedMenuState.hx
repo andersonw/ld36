@@ -18,6 +18,7 @@ class FinalizedMenuState extends FlxState
     var menuPolygon2:NewPolygonSprite;
 
     var playButton:BetterButton;
+    var aboutButton:BetterButton;
 
     override public function create():Void
     {
@@ -33,8 +34,10 @@ class FinalizedMenuState extends FlxState
         add(menuPolygon);
         add(menuPolygon2);
 
-        playButton = new BetterButton(270, 100, 100, 40, "Play", 18, startMinigames);
+        playButton = new BetterButton(270, 200, 100, 40, "Play", 18, startMinigames);
         add(playButton);
+        aboutButton = new BetterButton(270, 300, 100, 40, "About", 18, switchCredits);
+        add(aboutButton);
         //add(new FlxButtonPlus(270, 100, startMinigames, "Play", 100, 40));
         super.create();
     }
@@ -42,6 +45,11 @@ class FinalizedMenuState extends FlxState
     public function startMinigames():Void
     {
         FlxG.switchState(new WariowareState());
+    }
+
+    public function switchCredits():Void
+    {
+        FlxG.switchState(new CreditsState());
     }
 
     override public function update(elapsed:Float):Void

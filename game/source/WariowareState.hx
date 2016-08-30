@@ -28,12 +28,10 @@ class WariowareState extends FlxState
         if (Registry.player1Sides>=8)
         {
             trace("Player 1 wins!");
-            FlxG.switchState(new GameOverState());
         }
         if (Registry.player2Sides>=8)
         {
             trace("Player 2 wins!");
-            FlxG.switchState(new GameOverState());
         }
         var minigameIndex:Int = Std.random(Registry.gameList.length);
         Registry.currentGameIndex = minigameIndex;

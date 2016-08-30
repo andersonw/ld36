@@ -9,6 +9,7 @@ import flixel.ui.FlxButton;
 import flixel.math.FlxMath;
 import flixel.FlxSubState;
 import flixel.util.FlxColor;
+import flixel.system.FlxSound;
 
 class WinnerState extends FlxSubState
 {
@@ -32,6 +33,8 @@ class WinnerState extends FlxSubState
     var winy:Float;
     var wina:Float;
 
+    var explodeSound:FlxSound;
+
 	override public function create():Void
 	{
         var data = Registry.currentPlayerData;
@@ -44,6 +47,7 @@ class WinnerState extends FlxSubState
         w = data.w;
         h = data.h;
         r = data.r;
+        explodeSound = FlxG.sound.load(AssetPaths.explosion__wav);
 
         moveTimer = 0;
         hasFinished = false;
@@ -68,7 +72,7 @@ class WinnerState extends FlxSubState
         }
         add(winner);
         add(loser);
-        winnerText = new FlxText(0, h/4, 500, "Player " + Registry.currentMinigameWinner + " is the winner!\nSpace to continue", 20);
+        winnerText = new FlxText(0, h/4, 500, "Player " + Registry.currentMinigameWinner + " won the round!\nSpace to continue", 20);
         winnerText.visible = false;
         winnerText.alignment = CENTER;
         winnerText.setFormat(Registry.FONT_PATH, 20);
@@ -76,7 +80,15 @@ class WinnerState extends FlxSubState
         if(Registry.currentMinigameWinner == 1) Registry.player1Sides += 1;
         else Registry.player2Sides += 1;
 
-        loser.explode();
+        if (Registry.player1Sides>=8 || Registry.player2Sides>=8)
+        {
+            FlxG.switchState(new GameOverState());
+        }
+        else
+        {
+            explodeSound.play();
+            loser.explode();
+        }
 	}
 
     override public function update(elapsed:Float):Void
