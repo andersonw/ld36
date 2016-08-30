@@ -16,8 +16,8 @@ import flixel.input.keyboard.FlxKey;
 class LapRaceState extends BasicGameState
 {
 	var centerBumper:FlxSprite;
-	var outerLaneMarker:Array<Array<FlxSprite>>;
-	var innerLaneMarker:Array<Array<FlxSprite>>;
+
+    var laneMarker:Array<Array<Array<FlxSprite>>>;
 
     var currentLaneMarker:Array<Int>;
     var numberOfLaps:Array<Int>;
@@ -41,42 +41,34 @@ class LapRaceState extends BasicGameState
 
         // + Math.floor(Math.random()*7)
 
-        outerLaneMarker = new Array<Array<FlxSprite>>();
-        innerLaneMarker = new Array<Array<FlxSprite>>();
+        laneMarker = new Array<Array<Array<FlxSprite>>>();
 
         for(i in 0...2){
-        	outerLaneMarker.push(new Array<FlxSprite>());
-        	innerLaneMarker.push(new Array<FlxSprite>());
+            laneMarker.push(new Array<Array<FlxSprite>>());
+            for(j in 0...4) laneMarker[i].push(new Array<FlxSprite>());
+            for(j in 0...4){
+                laneMarker[i][0].push(new FlxSprite(j * LANE_WIDTH/4, height/2 - MARKER_WIDTH/2));
+                laneMarker[i][1].push(new FlxSprite(width/2 - MARKER_WIDTH/2, height - LANE_WIDTH + j * LANE_WIDTH/4));
+                laneMarker[i][2].push(new FlxSprite(width - LANE_WIDTH + j*LANE_WIDTH/4, height/2 - MARKER_WIDTH/2));
+                laneMarker[i][3].push(new FlxSprite(width/2 - MARKER_WIDTH/2, j * LANE_WIDTH/4));
+            }
 
-        	outerLaneMarker[i].push(new FlxSprite(0, height/2-MARKER_WIDTH/2));
-        	outerLaneMarker[i].push(new FlxSprite(width/2-MARKER_WIDTH/2, height-LANE_WIDTH/2));
-        	outerLaneMarker[i].push(new FlxSprite(width-LANE_WIDTH/2, height/2-MARKER_WIDTH/2));
-        	outerLaneMarker[i].push(new FlxSprite(width/2-MARKER_WIDTH/2, 0));
-
-        	innerLaneMarker[i].push(new FlxSprite(LANE_WIDTH/2, height/2-MARKER_WIDTH/2));
-        	innerLaneMarker[i].push(new FlxSprite(width/2-MARKER_WIDTH/2, height-LANE_WIDTH));
-        	innerLaneMarker[i].push(new FlxSprite(width-LANE_WIDTH, height/2-MARKER_WIDTH/2));
-        	innerLaneMarker[i].push(new FlxSprite(width/2-MARKER_WIDTH/2, LANE_WIDTH/2));
-        }
-        for(i in 0...2) for(j in 0...4){
-            if(j % 2 == 0){
-                outerLaneMarker[i][j].makeGraphic(cast LANE_WIDTH/2, MARKER_WIDTH);
-                innerLaneMarker[i][j].makeGraphic(cast LANE_WIDTH/2, MARKER_WIDTH);
-            }else{
-                outerLaneMarker[i][j].makeGraphic(MARKER_WIDTH, cast LANE_WIDTH/2);
-                innerLaneMarker[i][j].makeGraphic(MARKER_WIDTH, cast LANE_WIDTH/2);
+            for(j in 0...4){
+                if(j % 2 == 0){
+                    for(k in 0...4) laneMarker[i][j][k].makeGraphic(cast LANE_WIDTH/4, MARKER_WIDTH);
+                }else{
+                    for(k in 0...4) laneMarker[i][j][k].makeGraphic(MARKER_WIDTH, cast LANE_WIDTH/4);
+                }
             }
         }
-        for(i in 0...4){
-        	outerLaneMarker[0][i].color = Registry.player1Color;
-        	outerLaneMarker[1][i].color = Registry.player2Color;
 
-        	innerLaneMarker[0][i].color = Registry.player1Color;
-        	innerLaneMarker[1][i].color = Registry.player2Color;
+        for(j in 0...4) for(k in 0...4){
+        	laneMarker[0][j][k].color = Registry.player1Color;
+        	laneMarker[1][j][k].color = Registry.player2Color;
         }
-        for(i in 0...2) for(j in 1...4){
-            outerLaneMarker[i][j].visible = false;
-            innerLaneMarker[i][j].visible = false;
+
+        for(i in 0...2) for(j in 1...4) for(k in 0...4){
+            laneMarker[i][j][k].visible = false;
         }
 
         currentLaneMarker = new Array<Int>();
@@ -95,19 +87,20 @@ class LapRaceState extends BasicGameState
             180, 25, Registry.player1Color), [W, A, S, D]);
         makeSprite(new NewPolygonSprite(width/2, innerLane==1 ? LANE_WIDTH*3/4 : LANE_WIDTH/4, Registry.player2Sides,
             180, 25, Registry.player2Color), [UP, LEFT, DOWN, RIGHT]);
-        for(i in 0...4){
-            add(outerLaneMarker[innerLane][i]);
-            add(outerLaneMarker[1-innerLane][i]);
-            add(innerLaneMarker[1-innerLane][i]);
-            add(innerLaneMarker[innerLane][i]);
+
+        for(j in 0...4) for(k in 0...4){
+            if(k % 2 == 0){
+                add(laneMarker[0][j][k]);
+                add(laneMarker[1][j][k]);
+            }else{
+                add(laneMarker[1][j][k]);
+                add(laneMarker[0][j][k]);
+            }
         }
     }
 
     public function removeLaneMarkers():Void{
-        for(i in 0...2) for(j in 0...4){
-            remove(innerLaneMarker[i][j]);
-            remove(outerLaneMarker[i][j]);
-        }
+        for(i in 0...2) for(j in 0...4) for(k in 0...4) remove(laneMarker[i][j][k]);
     }
 
 	override public function update(elapsed:Float):Void
@@ -131,8 +124,7 @@ class LapRaceState extends BasicGameState
             }
             if(advanceLaneMarker){
                 lapSound.play();
-                innerLaneMarker[i][currentLaneMarker[i]].visible = false;
-                outerLaneMarker[i][currentLaneMarker[i]].visible = false;
+                for(k in 0...4) laneMarker[i][currentLaneMarker[i]][k].visible = false;
 
                 currentLaneMarker[i] += 1;
                 if(currentLaneMarker[i] >= 4){
@@ -140,8 +132,7 @@ class LapRaceState extends BasicGameState
                     numberOfLaps[i] += 1;
                 }
 
-                innerLaneMarker[i][currentLaneMarker[i]].visible = true;
-                outerLaneMarker[i][currentLaneMarker[i]].visible = true;
+                for(k in 0...4) laneMarker[i][currentLaneMarker[i]][k].visible = true;
 
                 if(numberOfLaps[i] >= LAPS_TO_WIN) declareWinner(i + 1);
             }
@@ -152,13 +143,9 @@ class LapRaceState extends BasicGameState
     public override function resetGame(){
         super.resetGame();
         addSprites();
-        for(i in 0...2){
-            outerLaneMarker[i][0].visible = true;
-            innerLaneMarker[i][0].visible = true;
-            for(j in 1...4){
-                outerLaneMarker[i][j].visible = false;
-                innerLaneMarker[i][j].visible = false;
-            }
+        for(i in 0...2) for(k in 0...4){
+            laneMarker[i][0][k].visible = true;
+            for(j in 1...4) laneMarker[i][j][k].visible = false;
         }
         currentLaneMarker = [0, 0];
         numberOfLaps = [0, 0];
