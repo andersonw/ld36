@@ -47,8 +47,8 @@ class SumoGameState extends BasicGameState
 
     public function addSprites():Void
     {
-        makeSprite(new NewPolygonSprite(110, 240, Registry.player1Sides, 0, 50, Registry.player1Color), [W, A, S, D]);
-        makeSprite(new NewPolygonSprite(530, 240, Registry.player2Sides, 180, 50, Registry.player2Color), [UP, LEFT, DOWN, RIGHT]);
+        makeSprite(new RegularPolygonSprite(110, 240, Registry.player1Sides, 0, 50, Registry.player1Color), [W, A, S, D]);
+        makeSprite(new RegularPolygonSprite(530, 240, Registry.player2Sides, 180, 50, Registry.player2Color), [UP, LEFT, DOWN, RIGHT]);
     }
 
     override public function update(elapsed:Float):Void
@@ -84,7 +84,7 @@ class SumoGameState extends BasicGameState
     //extremely simple right now, maybe we want to check if the edges themselves are outside the box
     public function isPlayerDead(playerNum:Int):Bool
     {
-        var player:NewPolygonSprite = playSprites[playerNum];
+        var player:RegularPolygonSprite = playSprites[playerNum];
         if (player.x < gameFieldXMargin-player.RADIUS ||
             player.x > width-gameFieldXMargin+player.RADIUS ||
             player.y < gameFieldYMargin-player.RADIUS ||

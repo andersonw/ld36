@@ -18,8 +18,8 @@ class GameOverState extends FlxSubState
     var finishedStage2:Bool;
     var finishedStage3:Bool;
 
-    var winner:NewPolygonSprite;
-    var loser:NewPolygonSprite;
+    var winner:RegularPolygonSprite;
+    var loser:RegularPolygonSprite;
     var cover:FlxSprite;
     var winnerText:FlxText;
     var flashCover:FlxSprite;
@@ -68,8 +68,8 @@ class GameOverState extends FlxSubState
         cover = new FlxSprite(0,0);
         cover.makeGraphic(cast w, cast h, FlxColor.BLACK);
         add(cover);
-        var p1 = new NewPolygonSprite(p1x, p1y, Registry.player1Sides, p1a, r, Registry.player1Color);
-        var p2 = new NewPolygonSprite(p2x, p2y, Registry.player2Sides, p2a, r, Registry.player2Color);
+        var p1 = new RegularPolygonSprite(p1x, p1y, Registry.player1Sides, p1a, r, Registry.player1Color);
+        var p2 = new RegularPolygonSprite(p2x, p2y, Registry.player2Sides, p2a, r, Registry.player2Color);
         if(Registry.currentMinigameWinner == 1){
             winner = p1;
             loser = p2;
@@ -116,7 +116,7 @@ class GameOverState extends FlxSubState
                 moveTimer = 0;
 
                 remove(winner);
-                var newWinner = new NewPolygonSprite(w/2, h/2, winner.numSides+1, winner.angle, winner.RADIUS, winner.color);
+                var newWinner = new RegularPolygonSprite(w/2, h/2, winner.numSides+1, winner.angle, winner.RADIUS, winner.color);
                 add(newWinner);
                 winner.destroy();
                 winner = newWinner;
@@ -131,7 +131,7 @@ class GameOverState extends FlxSubState
                 angleV = 10;
 
                 remove(winner);
-                var newWinner = new NewPolygonSprite(w/2, h/2, 40, winner.angle, winner.RADIUS, winner.color);
+                var newWinner = new RegularPolygonSprite(w/2, h/2, 40, winner.angle, winner.RADIUS, winner.color);
                 add(newWinner);
                 winner.destroy();
                 winner = newWinner;

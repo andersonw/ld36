@@ -13,8 +13,8 @@ class FinalizedMenuState extends FlxState
 {
     var titleText:FlxText;
 
-    var menuPolygon:NewPolygonSprite;
-    var menuPolygon2:NewPolygonSprite;
+    var menuPolygon:RegularPolygonSprite;
+    var menuPolygon2:RegularPolygonSprite;
 
     var playButton:BetterButton;
     var aboutButton:BetterButton;
@@ -28,8 +28,8 @@ class FinalizedMenuState extends FlxState
         titleText.y = 20;
         add(titleText);
 
-        menuPolygon = new NewPolygonSprite(67,45,5,20,22,Registry.player1Color);
-        menuPolygon2 = new NewPolygonSprite(290,45,6,190,22,Registry.player2Color);
+        menuPolygon = new RegularPolygonSprite(67,45,5,20,22,Registry.player1Color);
+        menuPolygon2 = new RegularPolygonSprite(290,45,6,190,22,Registry.player2Color);
         add(menuPolygon);
         add(menuPolygon2);
 

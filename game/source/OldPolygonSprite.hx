@@ -6,7 +6,7 @@ import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
 import flixel.addons.display.FlxNestedSprite;
 
-class PolygonSprite extends FlxNestedSprite
+class OldPolygonSprite extends FlxNestedSprite
 {
     public static inline var RADIUS:Float = 100;
 

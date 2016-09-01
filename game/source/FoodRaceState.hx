@@ -65,8 +65,8 @@ class FoodRaceState extends BasicGameState
 	}
 
 	private function addSprites(){
-		makeSprite(new NewPolygonSprite(width/4, height/2, Registry.player1Sides, 0, 25, Registry.player1Color), [W, A, S, D]);
-		makeSprite(new NewPolygonSprite(3*width/4, height/2, Registry.player2Sides, 180, 25, Registry.player2Color), [UP, LEFT, DOWN, RIGHT]);
+		makeSprite(new RegularPolygonSprite(width/4, height/2, Registry.player1Sides, 0, 25, Registry.player1Color), [W, A, S, D]);
+		makeSprite(new RegularPolygonSprite(3*width/4, height/2, Registry.player2Sides, 180, 25, Registry.player2Color), [UP, LEFT, DOWN, RIGHT]);
 	}
 
 	private function makePlayerText(x:Float, y:Float, c:FlxColor):Int{
@@ -93,7 +93,7 @@ class FoodRaceState extends BasicGameState
 
                     //increasing number of sides code
 					/*var oldSprite = playSprites[i];
-					playSprites[i] = new NewPolygonSprite(oldSprite.x, oldSprite.y, oldSprite.numSides+1, oldSprite.angle, oldSprite.RADIUS, oldSprite.color);
+					playSprites[i] = new RegularPolygonSprite(oldSprite.x, oldSprite.y, oldSprite.numSides+1, oldSprite.angle, oldSprite.RADIUS, oldSprite.color);
 					remove(oldSprite);
 					oldSprite.destroy();
 					add(playSprites[i]);*/

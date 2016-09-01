@@ -58,7 +58,7 @@ class KothGameState extends BasicGameState
         else if (player2Time>4) declareWinner(2);
     }
 
-    public function polygonContainsPoint(polygon:NewPolygonSprite, pointX:Float, pointY:Float):Bool
+    public function polygonContainsPoint(polygon:RegularPolygonSprite, pointX:Float, pointY:Float):Bool
     {
         //starting from 1 to ignore indicator
         for (i in 1...polygon.members.length)
@@ -90,8 +90,8 @@ class KothGameState extends BasicGameState
 
     public function addSprites():Void
     {
-        makeSprite(new NewPolygonSprite(60, 240, Registry.player1Sides, 0, 50, Registry.player1Color), [W, A, S, D]);
-        makeSprite(new NewPolygonSprite(580, 240, Registry.player2Sides, 180, 50, Registry.player2Color), [UP, LEFT, DOWN, RIGHT]);
+        makeSprite(new RegularPolygonSprite(60, 240, Registry.player1Sides, 0, 50, Registry.player1Color), [W, A, S, D]);
+        makeSprite(new RegularPolygonSprite(580, 240, Registry.player2Sides, 180, 50, Registry.player2Color), [UP, LEFT, DOWN, RIGHT]);
     }
 
     public function roundNum(num:Float, decimalPlaces:Int):String

@@ -86,9 +86,9 @@ class LapRaceState extends BasicGameState
 
     public function addSprites():Void{
         var innerLane:Int = Std.random(2);
-        makeSprite(new NewPolygonSprite(width/2, innerLane==0 ? LANE_WIDTH*3/4 : LANE_WIDTH/4, Registry.player1Sides,
+        makeSprite(new RegularPolygonSprite(width/2, innerLane==0 ? LANE_WIDTH*3/4 : LANE_WIDTH/4, Registry.player1Sides,
             180, 25, Registry.player1Color), [W, A, S, D]);
-        makeSprite(new NewPolygonSprite(width/2, innerLane==1 ? LANE_WIDTH*3/4 : LANE_WIDTH/4, Registry.player2Sides,
+        makeSprite(new RegularPolygonSprite(width/2, innerLane==1 ? LANE_WIDTH*3/4 : LANE_WIDTH/4, Registry.player2Sides,
             180, 25, Registry.player2Color), [UP, LEFT, DOWN, RIGHT]);
 
         for(j in 0...4) for(k in 0...4){

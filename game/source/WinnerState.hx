@@ -15,8 +15,8 @@ class WinnerState extends FlxSubState
 {
     var moveTimer:Float;
     var hasFinished:Bool;
-    var winner:NewPolygonSprite;
-    var loser:NewPolygonSprite;
+    var winner:RegularPolygonSprite;
+    var loser:RegularPolygonSprite;
     var cover:FlxSprite;
     var winnerText:FlxText;
     public static inline var WIN_TIMER:Float = 1;
@@ -55,8 +55,8 @@ class WinnerState extends FlxSubState
         cover = new FlxSprite(0,0);
         cover.makeGraphic(cast w, cast h, FlxColor.BLACK);
         add(cover);
-        var p1 = new NewPolygonSprite(p1x, p1y, Registry.player1Sides, p1a, r, Registry.player1Color);
-        var p2 = new NewPolygonSprite(p2x, p2y, Registry.player2Sides, p2a, r, Registry.player2Color);
+        var p1 = new RegularPolygonSprite(p1x, p1y, Registry.player1Sides, p1a, r, Registry.player1Color);
+        var p2 = new RegularPolygonSprite(p2x, p2y, Registry.player2Sides, p2a, r, Registry.player2Color);
         if(Registry.currentMinigameWinner == 1){
             winner = p1;
             loser = p2;
@@ -102,7 +102,7 @@ class WinnerState extends FlxSubState
         }else{
             if(!hasFinished){
                 remove(winner);
-                var newWinner = new NewPolygonSprite(w/2, h/2, winner.numSides+1, winner.angle, winner.RADIUS, winner.color);
+                var newWinner = new RegularPolygonSprite(w/2, h/2, winner.numSides+1, winner.angle, winner.RADIUS, winner.color);
                 add(newWinner);
                 winner.destroy();
                 winner = newWinner;

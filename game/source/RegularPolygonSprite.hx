@@ -7,11 +7,12 @@ import flixel.math.FlxPoint;
 import flixel.addons.display.FlxNestedSprite;
 import flixel.group.FlxGroup;
 
-class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
+class RegularPolygonSprite extends FlxTypedGroup<FlxSprite>
 {
     public var RADIUS:Float;
     public var x:Float;
     public var y:Float;
+    public var center:Point;
     public var angle:Float;
     public var numSides:Int;
     public var parent:BasicGameState;
@@ -34,6 +35,7 @@ class NewPolygonSprite extends FlxTypedGroup<FlxSprite>
         this.numSides = numSides;
         this.x = centerX;
         this.y = centerY;
+        this.center = new Point(x, y);
         this.angle = angle;
         this.RADIUS = radius;
         this.parent = parentState;
