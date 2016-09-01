@@ -89,7 +89,7 @@ class BasicGameState extends FlxSubState
         keyLists = new Array<Array<FlxKey>>();
         
         var boundary:FlxRect = new FlxRect(0, 0, width, height);
-        // boundingBoxes.push(boundary);
+        boundingBoxes.push(boundary);
         currentlyCollidingBoundary = false;
         currentlyColliding = false;
 
@@ -243,39 +243,51 @@ class BasicGameState extends FlxSubState
             {    
                 var sprite:RegularPolygonSprite = playSprites[i];
 
+                if(currentlyCollidingBoundary){
+                    trace(velocities[i].x * 60 * elapsed, velocities[i].y * 60 * elapsed);
+                    trace('before', sprite.x, sprite.y);
+                }
+
                 // apply velocities
                 sprite.x += velocities[i].x * 60 * elapsed;
                 sprite.y += velocities[i].y * 60 * elapsed;
                 sprite.center = new Point(sprite.x, sprite.y, i);
                 sprite.angle += aVelocities[i] * 60 * elapsed;
+                sprite.update(elapsed);
                 // max velocity in game is around 16. theoretical is 20
                 // max angular velocity in game is around 9. theoretical is 10
+
+                if(currentlyCollidingBoundary) trace('after', sprite.x, sprite.y);
                 
                 // apply drags
-                velocities[i].x *= DRAG;
-                velocities[i].y *= DRAG;
-                aVelocities[i] *= ANGULAR_DRAG;
+                velocities[i].x *= (1 - (1-DRAG) * 60 * elapsed);
+                velocities[i].y *= (1 - (1-DRAG) * 60 * elapsed);
+                aVelocities[i] *= (1 - (1-ANGULAR_DRAG) * 60 * elapsed);
 
                 // check key for accelerations
                 if(keyLists[i].length >= 4 && !currentlyColliding){
-                    if(FlxG.keys.anyPressed([keyLists[i][1]])) aVelocities[i] -= ANGULAR_ACCELERATION * 60 * elapsed;
-                    if(FlxG.keys.anyPressed([keyLists[i][3]])) aVelocities[i] += ANGULAR_ACCELERATION * 60 * elapsed;
+                    if(FlxG.keys.anyPressed([keyLists[i][1]]))
+                        aVelocities[i] -= ANGULAR_ACCELERATION * 60 * elapsed;
+                    if(FlxG.keys.anyPressed([keyLists[i][3]]))
+                        aVelocities[i] += ANGULAR_ACCELERATION * 60 * elapsed;
                     if(FlxG.keys.anyPressed([keyLists[i][0]]))
                         velocities[i].add(Point.polarPoint(ACCELERATION * 60 * elapsed, Math.PI*sprite.angle/180));
                     if(FlxG.keys.anyPressed([keyLists[i][2]]))
                         velocities[i].subtract(Point.polarPoint(ACCELERATION * 60 * elapsed, Math.PI*sprite.angle/180));
                 }
 
-                // keep sprites within bounds
-                if(sprite.x < 0 && velocities[i].x < 0) velocities[i].x *= -1;
-                if(sprite.x > width && velocities[i].x > 0) velocities[i].x *= -1;
-                if(sprite.y < 0 && velocities[i].y < 0) velocities[i].y *= -1;
-                if(sprite.y > height && velocities[i].y > 0) velocities[i].y *= -1;
+                // // keep sprites within bounds
+                // if(sprite.x < 0 && velocities[i].x < 0) velocities[i].x *= -1;
+                // if(sprite.x > width && velocities[i].x > 0) velocities[i].x *= -1;
+                // if(sprite.y < 0 && velocities[i].y < 0) velocities[i].y *= -1;
+                // if(sprite.y > height && velocities[i].y > 0) velocities[i].y *= -1;
 
             }
 
-            checkCollisions();
+            // checkCollisions();
             checkAndHandleBoundaryCollisions();
+
+            trace('         end update');
 
         }
     }
@@ -296,11 +308,11 @@ class BasicGameState extends FlxSubState
 
     private function checkAndHandleSpriteBoundaryCollision(a:Int, b:Int):Bool{
         // get A endppoints
-        var playerASides:Array<FlxSprite> = playSprites[a].members;
+        var playerASides:Array<EdgeSprite> = playSprites[a].members;
         var playerAEndpoints:Array<Point> = new Array<Point>();
         for (i in 0...playerASides.length)
         {
-            var rect:FlxSprite = playerASides[i];
+            var rect:EdgeSprite = playerASides[i];
             var radAngle:Float = rect.angle * Math.PI / 180;
             var centerX:Float = rect.x + rect.width/2;
             var centerY:Float = rect.y + rect.height/2;
@@ -325,7 +337,7 @@ class BasicGameState extends FlxSubState
                 var p2 = playerBEndPoints[j+1];
 
                 if(checkCollidePointAndSegment(p, p1, p2)){
-                    if(!currentlyCollidingBoundary){
+                    // if(!currentlyCollidingBoundary){
 
                         var aCenter:Point = new Point(playSprites[a].x, playSprites[a].y, a);
                         // var bCenter:Point = new Point(0.5*(rect.left + rect.right), 0.5*(rect.top + rect.bottom));
@@ -350,21 +362,18 @@ class BasicGameState extends FlxSubState
                         var e = 1;
                         // var j = Math.abs( (1+e) * top ) / (1/1 + 1/1 + Math.pow(Point.cross(aRad, nvec),2) / (5.0/4 * Math.pow(playSprites[a].RADIUS, 2)) + Math.pow(Point.cross(bRad, nvec),2) / (5.0/4 * Math.pow(playSprites[b].RADIUS, 2)));
                         var imp;
-                        // if(j%2 == 0)
-                        //     imp = Math.abs(velocities[a].x);
-                        // else
-                        //     imp = Math.abs(velocities[a].y);
                         imp = -top;
 
-                        // trace(nvec);
-                        // trace(p);
-                        // trace('avel', aVelocities[a]);
+                        trace(nvec);
+                        trace(p);
+                        trace(aCenter);
+                        trace('avel', aVelocities[a]);
                         applyImpulse(a, nvec, 2*imp, aRad);
                         // trace(imp);
 
                         // if(checkCollidePointAndSegment(p, p1, p2))
                             // trace('fuck');
-                    }
+                    // }
 
                     currentlyCollidingBoundary = true;
                     return true;
@@ -391,11 +400,11 @@ class BasicGameState extends FlxSubState
         var superCollides:Bool = false;
 
         // getA endpoints
-        var playerASides:Array<FlxSprite> = playSprites[a].members;
+        var playerASides:Array<EdgeSprite> = playSprites[a].members;
         var playerAEndpoints:Array<Point> = new Array<Point>();
         for (i in 0...playerASides.length)
         {
-            var rect:FlxSprite = playerASides[i];
+            var rect:EdgeSprite = playerASides[i];
             var radAngle:Float = rect.angle * Math.PI / 180;
             var centerX:Float = rect.x + rect.width/2;
             var centerY:Float = rect.y + rect.height/2;
@@ -403,7 +412,7 @@ class BasicGameState extends FlxSubState
             playerAEndpoints.push(new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, a));
         }
         
-        var playerBSides:Array<FlxSprite> = playSprites[b].members;
+        var playerBSides:Array<EdgeSprite> = playSprites[b].members;
         var playerBColor:FlxColor = playSprites[b].color;
 
 
@@ -477,8 +486,6 @@ class BasicGameState extends FlxSubState
         return superCollides;
 
     }
-
-    
 
     private function checkCollidePointAndRect(p:Point, rect:FlxSprite, rectIndex:Int){
         var radAngle:Float = rect.angle * Math.PI / 180;

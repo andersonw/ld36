@@ -23,8 +23,8 @@ class GameObject{
         sprite.x += vel.x * 60 * elapsed;
         sprite.y += vel.y * 60 * elapsed;
         sprite.angle += avel * 60 * elapsed;
-        vel = vel.scale(BasicGameState.DRAG);
-        avel *= BasicGameState.ANGULAR_DRAG;
+        vel = vel.scale(1 - (1-BasicGameState.DRAG) * 60 * elapsed);
+        avel *= (1 - (1-BasicGameState.ANGULAR_DRAG) * 60 * elapsed);
     }
 
     public function destroy(){
