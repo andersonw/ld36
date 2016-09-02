@@ -78,9 +78,9 @@ class RegularPolygonSprite extends FlxTypedGroup<EdgeSprite>
     }
 
     override public function update(elapsed:Float){
-        trace('begin polygon update', numSides);
+        // trace('begin polygon update', numSides);
 
-        trace(x, y, angle);
+        // trace(x, y, angle);
         
         super.update(elapsed);
 
@@ -108,7 +108,7 @@ class RegularPolygonSprite extends FlxTypedGroup<EdgeSprite>
 
         // trace(x, y, angle);
 
-        trace('end polygon update', numSides);
+        // trace('end polygon update', numSides);
     }
 
     /*

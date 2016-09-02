@@ -242,10 +242,10 @@ class BasicGameState extends FlxSubState
             {    
                 var sprite:RegularPolygonSprite = playSprites[i];
 
-                if(currentlyCollidingBoundary){
-                    trace(velocities[i].x * 60 * elapsed, velocities[i].y * 60 * elapsed);
-                    trace('before', sprite.x, sprite.y);
-                }
+                // if(currentlyCollidingBoundary){
+                //     trace(velocities[i].x * 60 * elapsed, velocities[i].y * 60 * elapsed);
+                //     trace('before', sprite.x, sprite.y);
+                // }
 
                 // apply velocities
                 sprite.x += velocities[i].x * 60 * elapsed;
@@ -256,7 +256,7 @@ class BasicGameState extends FlxSubState
                 // max velocity in game is around 16. theoretical is 20
                 // max angular velocity in game is around 9. theoretical is 10
 
-                if(currentlyCollidingBoundary) trace('after', sprite.x, sprite.y);
+                // if(currentlyCollidingBoundary) trace('after', sprite.x, sprite.y);
                 
                 // apply drags
                 velocities[i].x *= (1 - (1-DRAG) * 60 * elapsed);
@@ -286,7 +286,7 @@ class BasicGameState extends FlxSubState
             checkAndHandleCollisions();
             checkAndHandleBoundaryCollisions();
 
-            trace('         end update');
+            // trace('         end update');
 
         }
     }
@@ -363,15 +363,15 @@ class BasicGameState extends FlxSubState
                         var imp;
                         imp = -top;
 
-                        trace(nvec);
-                        trace(p);
-                        trace(aCenter);
-                        trace('avel', aVelocities[a]);
+                        // trace(nvec);
+                        // trace(p);
+                        // trace(aCenter);
+                        // trace('avel', aVelocities[a]);
                         applyImpulse(a, nvec, 2*imp, aRad);
                         // trace(imp);
 
-                        // if(checkCollidePointAndSegment(p, p1, p2))
-                            // trace('fuck');
+                        if(checkCollidePointAndSegment(p, p1, p2))
+                            trace('fuck');
                     // }
 
                     currentlyCollidingBoundary = true;
@@ -512,11 +512,12 @@ class BasicGameState extends FlxSubState
             // trace(currd*newd);
         }
 
-        var dif:Point = Point.minus(p2, p1);
+        var dif:Point = Point.minus(newp2, newp1);
 
-        var onSegment = Point.dot(Point.minus(p, p1), dif) / Point.dot(dif, dif);
+        var onSegment = Point.dot(Point.minus(newp, newp1), dif) / Point.dot(dif, dif);
         // var tolerance = 0.07;
-        var tolerancePix = 7;
+        // var tolerancePix = 7;
+        var tolerancePix = 0;
         var osval = (Math.abs(onSegment - 0.5) - 0.5);
         if(osval * dif.magnitude() < tolerancePix){
             return true;
