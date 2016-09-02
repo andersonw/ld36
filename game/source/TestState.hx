@@ -20,7 +20,7 @@ class TestState extends BasicGameState
 
         // + Math.floor(Math.random()*7)
 
-		// makeSprite(new RegularPolygonSprite(70, 70, 4, 10, 50), [W, A, S, D]);
+		makeSprite(new RegularPolygonSprite(70, 70, 4, 10, 50), [W, A, S, D]);
 		makeSprite(new RegularPolygonSprite(400, 400, 3, 74, 50), [UP, LEFT, DOWN, RIGHT]);
 	}
 

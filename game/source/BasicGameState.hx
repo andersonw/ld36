@@ -215,7 +215,6 @@ class BasicGameState extends FlxSubState
             timeToGameStart -= elapsed;
             if (!showRules)
                 gameRulesText.visible = false;
-
             if (timeToGameStart>0)
                 updateCountdownText();
             else
@@ -284,7 +283,7 @@ class BasicGameState extends FlxSubState
 
             }
 
-            // checkCollisions();
+            checkAndHandleCollisions();
             checkAndHandleBoundaryCollisions();
 
             trace('         end update');
@@ -387,7 +386,7 @@ class BasicGameState extends FlxSubState
 
     }
 
-    private function checkCollisions():Void
+    private function checkAndHandleCollisions():Void
     {
         currentlyColliding = (collideSpriteAPointsWithSpriteBEdges(0,1) || collideSpriteAPointsWithSpriteBEdges(1,0)) && currentlyColliding;
     }
