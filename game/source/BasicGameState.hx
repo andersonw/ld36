@@ -248,10 +248,11 @@ class BasicGameState extends FlxSubState
                 // }
 
                 // apply velocities
-                sprite.x += velocities[i].x * 60 * elapsed;
-                sprite.y += velocities[i].y * 60 * elapsed;
-                sprite.center = new Point(sprite.x, sprite.y, i);
-                sprite.angle += aVelocities[i] * 60 * elapsed;
+                // sprite.x += velocities[i].x * 60 * elapsed;
+                // sprite.y += velocities[i].y * 60 * elapsed;
+                // sprite.center = new Point(sprite.x, sprite.y, i);
+                // sprite.angle += aVelocities[i] * 60 * elapsed;
+                sprite.newUpdate(elapsed, velocities[i].x, velocities[i].y, aVelocities[i]);
                 sprite.update(elapsed);
                 // max velocity in game is around 16. theoretical is 20
                 // max angular velocity in game is around 9. theoretical is 10
@@ -371,7 +372,7 @@ class BasicGameState extends FlxSubState
                         // trace(imp);
 
                         if(checkCollidePointAndSegment(p, p1, p2))
-                            trace('fuck');
+                            trace('bad thing boundary');
                     // }
 
                     currentlyCollidingBoundary = true;
@@ -470,11 +471,20 @@ class BasicGameState extends FlxSubState
                         // http://gamedevelopment.tutsplus.com/tutorials/how-to-create-a-custom-2d-physics-engine-oriented-rigid-bodies--gamedev-8032
                         // http://chrishecker.com/images/e/e7/Gdmphys3.pdf
 
+                        // var totalBefore = getKineticEnergy(a) + getKineticEnergy(b);
+
                         applyImpulse(a, nvec, j, aRad);
                         // applyImpulse(b, new Point(-nvec.x, -nvec.y), -j, bRad);
                         applyImpulse(b, nvec, -j, new Point(-bRad.x, -bRad.y));
 
+                        // var totalAfter = getKineticEnergy(a) + getKineticEnergy(b);
+
+                        // trace('kinetic energy', totalBefore, totalAfter);
+
                         polygonHitSound.play();
+
+                        if(checkCollidePointAndSegment(p, p1, p2))
+                            trace('bad thing interpolygon');
                     }
                     break;
                 }
@@ -483,6 +493,19 @@ class BasicGameState extends FlxSubState
         }
 
         return superCollides;
+
+    }
+
+    private function getKineticEnergy(i:Int):Float
+    {        
+        // translational
+        var trans = 0.5 * Math.pow(velocities[i].magnitude(), 2);
+
+        // rotational
+        var rot = 0.5 * 5 / 4 * Math.pow(playSprites[i].RADIUS * aVelocities[i] * Math.PI / 180.0, 2);
+
+        // trace(i, trans, rot, trans+rot);
+        return trans + rot;
 
     }
 

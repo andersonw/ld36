@@ -5,9 +5,9 @@ import flixel.FlxSprite;
 
 class EdgeSprite extends FlxSprite
 {
-    // public p1:Point;
-    // public p2:Point;
-    // public center:Point;
+    public var p1:Point;
+    public var p2:Point;
+    public var center:Point;
     // public parentSprite:RegularPolygonSprite;
 
     // public function new(){
@@ -23,4 +23,8 @@ class EdgeSprite extends FlxSprite
         super.update(elapsed);
         // trace('end update', this.x, this.y, this.angle);
     }
+
+    // public function edgeUpdate(elapsed:Float, parent:RegularPolygonSprite, i:Int){
+    //     this.x = parent.x + parent.apothemLength
+    // }
 }
