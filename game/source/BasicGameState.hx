@@ -32,6 +32,8 @@ class BasicGameState extends FlxSubState
 
     var currentlyColliding:Bool;
     var currentlyCollidingBoundary:Bool;
+    var printing:Bool;
+    var printrightnow:Bool;
 
     var paused:Bool;
     var pauseMenu:Bool;
@@ -242,10 +244,11 @@ class BasicGameState extends FlxSubState
             {    
                 var sprite:RegularPolygonSprite = playSprites[i];
 
-                // if(currentlyCollidingBoundary){
-                //     trace(velocities[i].x * 60 * elapsed, velocities[i].y * 60 * elapsed);
-                //     trace('before', sprite.x, sprite.y);
-                // }
+                if(printing || printrightnow){
+                    trace(printing, printrightnow);
+                    trace(velocities[i].x * 60 * elapsed, velocities[i].y * 60 * elapsed);
+                    trace('before', sprite.x, sprite.y);
+                }
 
                 // apply velocities
                 // sprite.x += velocities[i].x * 60 * elapsed;
@@ -257,7 +260,8 @@ class BasicGameState extends FlxSubState
                 // max velocity in game is around 16. theoretical is 20
                 // max angular velocity in game is around 9. theoretical is 10
 
-                // if(currentlyCollidingBoundary) trace('after', sprite.x, sprite.y);
+                if(printing || printrightnow)
+                    trace('after', sprite.x, sprite.y);
                 
                 // apply drags
                 velocities[i].x *= (1 - (1-DRAG) * 60 * elapsed);
@@ -281,6 +285,9 @@ class BasicGameState extends FlxSubState
                 // if(sprite.x > width && velocities[i].x > 0) velocities[i].x *= -1;
                 // if(sprite.y < 0 && velocities[i].y < 0) velocities[i].y *= -1;
                 // if(sprite.y > height && velocities[i].y > 0) velocities[i].y *= -1;
+
+                
+
 
             }
 
@@ -336,8 +343,18 @@ class BasicGameState extends FlxSubState
                 var p1 = playerBEndPoints[j];
                 var p2 = playerBEndPoints[j+1];
 
+                var blah = 20;
+                printrightnow = (p.x < 0 + blah || p.x > width - blah || p.y < 0 + blah || p.y > height - blah);
+                // trace('p', printrightnow);
+                
+                blah = 0;
+                if(p.x < 0 + blah|| p.x > width - blah || p.y < 0 + blah || p.y > height - blah){
+                    printing = true;
+                }
+
                 if(checkCollidePointAndSegment(p, p1, p2)){
                     // if(!currentlyCollidingBoundary){
+
 
                         var aCenter:Point = new Point(playSprites[a].x, playSprites[a].y, a);
                         // var bCenter:Point = new Point(0.5*(rect.left + rect.right), 0.5*(rect.top + rect.bottom));
@@ -363,6 +380,13 @@ class BasicGameState extends FlxSubState
                         // var j = Math.abs( (1+e) * top ) / (1/1 + 1/1 + Math.pow(Point.cross(aRad, nvec),2) / (5.0/4 * Math.pow(playSprites[a].RADIUS, 2)) + Math.pow(Point.cross(bRad, nvec),2) / (5.0/4 * Math.pow(playSprites[b].RADIUS, 2)));
                         var imp;
                         imp = -top;
+
+                        if(printing || printrightnow){
+                            trace(p);
+                            trace(aCenter);
+                            trace('da', Point.minus(p, aCenter).magnitude(), aVelocities[a]);
+                            trace(velocities[a]);
+                        }
 
                         // trace(nvec);
                         // trace(p);
@@ -418,18 +442,23 @@ class BasicGameState extends FlxSubState
 
         for (i in 0...playerBSides.length)
         {
-            var rect:FlxSprite = playerBSides[i];
+            var rect:EdgeSprite = playerBSides[i];
             var collides:Bool = false;
 
             for (j in 0...playerASides.length)
             {
                 var p = playerAEndpoints[j];
-                if (checkCollidePointAndRect(p, rect, b))
+                var points = getEndpointsOfRect(rect, b);
+                var p1 = points[0];
+                var p2 = points[1];
+                // if (checkCollidePointAndRect(p, rect, b))
+                if(checkCollidePointAndSegment(p, p1, p2))
                 {
                     collides = true;
                     superCollides = true;
-                    if (!currentlyColliding)
+                    // if (!currentlyColliding)
                     {
+
                         currentlyColliding = true;
 
                         var pcoord:Float = projectiveCoordinateWithRect(p, rect);
@@ -444,12 +473,12 @@ class BasicGameState extends FlxSubState
                         var bRad:Point = Point.minus(collPoint, bCenter);
                         var velDif:Point = Point.minus(velocities[a], velocities[b]);
 
-                        var radAngle:Float = rect.angle * Math.PI / 180;
-                        var centerX:Float = rect.x + rect.width/2;
-                        var centerY:Float = rect.y + rect.height/2;
+                        // var radAngle:Float = rect.angle * Math.PI / 180;
+                        // var centerX:Float = rect.x + rect.width/2;
+                        // var centerY:Float = rect.y + rect.height/2;
 
-                        var p1 = new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, b);
-                        var p2 = new Point(centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2, b);
+                        // var p1 = new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, b);
+                        // var p2 = new Point(centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2, b);
                         var line = Point.minus(p2, p1);
                         var nvec = new Point(-line.y / line.magnitude(), line.x / line.magnitude());
 
@@ -517,6 +546,20 @@ class BasicGameState extends FlxSubState
         var p1 = new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, rectIndex);
         var p2 = new Point(centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2, rectIndex);
         return checkCollidePointAndSegment(p, p1, p2);
+    }
+
+    private function getEndpointsOfRect(rect:EdgeSprite, rectIndex:Int){
+        var radAngle:Float = rect.angle * Math.PI / 180;
+        var centerX:Float = rect.x + rect.width/2;
+        var centerY:Float = rect.y + rect.height/2;
+
+        var p1 = new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, rectIndex);
+        var p2 = new Point(centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2, rectIndex);
+
+        var points = new Array<Point>();
+        points.push(p1);
+        points.push(p2);
+        return points;
     }
 
     private function checkCollidePointAndSegment(p:Point, p1:Point, p2:Point):Bool{
