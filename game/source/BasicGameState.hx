@@ -291,6 +291,8 @@ class BasicGameState extends FlxSubState
 
             }
 
+            // trace('should be updated, not yet checking collisions');
+
             checkAndHandleCollisions();
             checkAndHandleBoundaryCollisions();
 
@@ -313,8 +315,9 @@ class BasicGameState extends FlxSubState
             currentlyCollidingBoundary = false;
     }
 
-    private function checkAndHandleSpriteBoundaryCollision(a:Int, b:Int):Bool{
-        // get A endppoints
+    private function checkAndHandleSpriteBoundaryCollision(a:Int, b:Int):Bool
+    {
+        // get A endpoints
         var playerASides:Array<EdgeSprite> = playSprites[a].members;
         var playerAEndpoints:Array<Point> = new Array<Point>();
         for (i in 0...playerASides.length)
@@ -352,17 +355,20 @@ class BasicGameState extends FlxSubState
                     printing = true;
                 }
 
-                if(checkCollidePointAndSegment(p, p1, p2)){
+                // TODO: check correctness of this
+                if(checkCollidePointAndSegment(p, a, p1, p2, -1)){
                     // if(!currentlyCollidingBoundary){
 
+                        // var pcoord:Float = projectiveCoordinateWithRect(p, rect);
+                        // var collPoint:Point = pointAlongRectangle(rect, pcoord);
+                        var collPoint = p;
 
-                        var aCenter:Point = new Point(playSprites[a].x, playSprites[a].y, a);
-                        // var bCenter:Point = new Point(0.5*(rect.left + rect.right), 0.5*(rect.top + rect.bottom));
+                        var aCenter = playSprites[a].center;
+                        var bCenter = new Point(width/2, height/2); // TODO: un-hardcode this
 
                         var aRad:Point = Point.minus(p, aCenter);
-                        // var bRad:Point = Point.minus(p, bCenter);
-                        var velDif = velocities[a];
-
+                        var bRad:Point = Point.minus(collPoint, bCenter);
+                        var velDif:Point = Point.minus(velocities[a], velocities[b]);
 
                         var line = Point.minus(p2, p1);
                         var nvec = new Point(-line.y / line.magnitude(), line.x / line.magnitude());
@@ -370,16 +376,51 @@ class BasicGameState extends FlxSubState
                         
                         var diffa = Point.minus(p.rotatedCW(aCenter, aVelocities[a]), p);
                         var vap = Point.plus(velocities[a], diffa);
-                        var top = Point.dot(vap, nvec);
+                        var vbp = new Point(0, 0);
+                        var top = Point.dot(Point.minus(vap, vbp), nvec);
                         if(top > 0){
                             nvec = new Point(-nvec.x, -nvec.y);
                             top *= -1;
                         }
+                        // nvec should point from b.edge outwards
 
                         var e = 1;
-                        // var j = Math.abs( (1+e) * top ) / (1/1 + 1/1 + Math.pow(Point.cross(aRad, nvec),2) / (5.0/4 * Math.pow(playSprites[a].RADIUS, 2)) + Math.pow(Point.cross(bRad, nvec),2) / (5.0/4 * Math.pow(playSprites[b].RADIUS, 2)));
-                        var imp;
-                        imp = -top;
+                        var imp = Math.abs( (1+e) * top ) / (1/1 + Math.pow(Point.cross(aRad, nvec),2) / (5.0/4 * Math.pow(playSprites[a].RADIUS, 2)));
+
+                        applyImpulse(a, nvec, imp, aRad);
+
+
+
+
+
+
+
+
+                        // // var aCenter:Point = new Point(playSprites[a].x, playSprites[a].y, a);
+                        // var aCenter = playSprites[a].center;
+                        // // var bCenter:Point = new Point(0.5*(rect.left + rect.right), 0.5*(rect.top + rect.bottom));
+
+                        // var aRad:Point = Point.minus(p, aCenter);
+                        // // var bRad:Point = Point.minus(p, bCenter);
+                        // var velDif = velocities[a];
+
+
+                        // var line = Point.minus(p2, p1);
+                        // var nvec = new Point(-line.y / line.magnitude(), line.x / line.magnitude());
+
+                        
+                        // var diffa = Point.minus(p.rotatedCW(aCenter, aVelocities[a]), p);
+                        // var vap = Point.plus(velocities[a], diffa);
+                        // var top = Point.dot(vap, nvec);
+                        // if(top > 0){
+                        //     nvec = new Point(-nvec.x, -nvec.y);
+                        //     top *= -1;
+                        // }
+
+                        // var e = 1;
+                        // // var j = Math.abs( (1+e) * top ) / (1/1 + 1/1 + Math.pow(Point.cross(aRad, nvec),2) / (5.0/4 * Math.pow(playSprites[a].RADIUS, 2)) + Math.pow(Point.cross(bRad, nvec),2) / (5.0/4 * Math.pow(playSprites[b].RADIUS, 2)));
+                        // var imp;
+                        // imp = -top;
 
                         if(printing || printrightnow){
                             trace(p);
@@ -388,14 +429,14 @@ class BasicGameState extends FlxSubState
                             trace(velocities[a]);
                         }
 
-                        // trace(nvec);
-                        // trace(p);
-                        // trace(aCenter);
-                        // trace('avel', aVelocities[a]);
-                        applyImpulse(a, nvec, 2*imp, aRad);
+                        trace(nvec);
+                        trace(p);
+                        trace(aCenter);
+                        trace('avel', aVelocities[a]);
+                        // applyImpulse(a, nvec, 2*imp, aRad);
                         // trace(imp);
 
-                        if(checkCollidePointAndSegment(p, p1, p2))
+                        if(checkCollidePointAndSegment(p, a, p1, p2, -1))
                             trace('bad thing boundary');
                     // }
 
@@ -424,7 +465,8 @@ class BasicGameState extends FlxSubState
         var superCollides:Bool = false;
 
         // getA endpoints
-        var playerASides:Array<EdgeSprite> = playSprites[a].members;
+        var playerASides:Array<EdgeSprite> = playSprites[a].members.slice(1);
+        // playerASides.remove(playerASides[0]); // remove the indicator
         var playerAEndpoints:Array<Point> = new Array<Point>();
         for (i in 0...playerASides.length)
         {
@@ -436,7 +478,8 @@ class BasicGameState extends FlxSubState
             playerAEndpoints.push(new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, a));
         }
         
-        var playerBSides:Array<EdgeSprite> = playSprites[b].members;
+        var playerBSides:Array<EdgeSprite> = playSprites[b].members.slice(1);
+        // playerBSides.remove(playerBSides[0]); // remove the indicator
         var playerBColor:FlxColor = playSprites[b].color;
 
 
@@ -451,8 +494,10 @@ class BasicGameState extends FlxSubState
                 var points = getEndpointsOfRect(rect, b);
                 var p1 = points[0];
                 var p2 = points[1];
+                // var p1 = rect.p1;
+                // var p2 = rect.p2;
                 // if (checkCollidePointAndRect(p, rect, b))
-                if(checkCollidePointAndSegment(p, p1, p2))
+                if(checkCollidePointAndSegment(p, a, p1, p2, b))
                 {
                     collides = true;
                     superCollides = true;
@@ -512,7 +557,7 @@ class BasicGameState extends FlxSubState
 
                         polygonHitSound.play();
 
-                        if(checkCollidePointAndSegment(p, p1, p2))
+                        if(checkCollidePointAndSegment(p, a, p1, p2, b))
                             trace('bad thing interpolygon');
                     }
                     break;
@@ -538,15 +583,15 @@ class BasicGameState extends FlxSubState
 
     }
 
-    private function checkCollidePointAndRect(p:Point, rect:FlxSprite, rectIndex:Int){
-        var radAngle:Float = rect.angle * Math.PI / 180;
-        var centerX:Float = rect.x + rect.width/2;
-        var centerY:Float = rect.y + rect.height/2;
+    // private function checkCollidePointAndRect(p:Point, rect:FlxSprite, rectIndex:Int){
+    //     var radAngle:Float = rect.angle * Math.PI / 180;
+    //     var centerX:Float = rect.x + rect.width/2;
+    //     var centerY:Float = rect.y + rect.height/2;
 
-        var p1 = new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, rectIndex);
-        var p2 = new Point(centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2, rectIndex);
-        return checkCollidePointAndSegment(p, p1, p2);
-    }
+    //     var p1 = new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, rectIndex);
+    //     var p2 = new Point(centerX + rect.width*Math.cos(radAngle)/2, centerY + rect.width*Math.sin(radAngle)/2, rectIndex);
+    //     return checkCollidePointAndSegment(p, p1, p2);
+    // }
 
     private function getEndpointsOfRect(rect:EdgeSprite, rectIndex:Int){
         var radAngle:Float = rect.angle * Math.PI / 180;
@@ -562,13 +607,13 @@ class BasicGameState extends FlxSubState
         return points;
     }
 
-    private function checkCollidePointAndSegment(p:Point, p1:Point, p2:Point):Bool{
+    private function checkCollidePointAndSegment(p:Point, a:Int, p1:Point, p2:Point, b:Int):Bool{
         
         var currd = getDiscriminant(p, p1, p2);
 
-        var newp = getUpdatedPoint(p);
-        var newp1 = getUpdatedPoint(p1);
-        var newp2 = getUpdatedPoint(p2);
+        var newp = getUpdatedPoint(p, a);
+        var newp1 = getUpdatedPoint(p1, b);
+        var newp2 = getUpdatedPoint(p2, b);
         var newd = getDiscriminant(newp, newp1, newp2);
 
         var tolDiscrim = 0;
@@ -655,6 +700,11 @@ class BasicGameState extends FlxSubState
     }
 
     private static function getDiscriminant(p:Point, p1:Point, p2:Point):Float{
+        // trace(p);
+        // trace(p1);
+        // trace(p2);
+        // standard form ax + by = c defines the line
+        // discriminant determines which side point p is on of line segment p1-p2
         var a = p2.y - p1.y;
         var b = p1.x - p2.x;
         var c = a*p1.x + b*p1.y;
@@ -662,19 +712,21 @@ class BasicGameState extends FlxSubState
         return a*p.x + b*p.y - c;
     }
 
-    private function getUpdatedPoint(p:Point):Point{
+    private function getUpdatedPoint(p:Point, i:Int):Point{
         var numFrames = 1.5;
 
-        var i = p.polyInd;
-        if(i < 0)
+        if(i < 0){
+            // trace('wtf');
             return p;
+        }
 
         // update by velocity
         var newp:Point = Point.plus(p, velocities[i].scale(numFrames));
         newp.polyInd = i;
 
         // update by rotation
-        var origin = new Point(playSprites[i].x, playSprites[i].y, i);
+        // var origin = new Point(playSprites[i].x, playSprites[i].y, i);
+        var origin = playSprites[i].center;
         return newp.rotatedCW(origin, numFrames*aVelocities[i]);
     }
 

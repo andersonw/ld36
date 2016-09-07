@@ -28,6 +28,7 @@ class SumoGameState extends BasicGameState
         add(gameField);
         //creating now so width and height get defined
         super.create();
+        boundingBoxes.pop();
 
         player1Score = 0;
         player2Score = 0;

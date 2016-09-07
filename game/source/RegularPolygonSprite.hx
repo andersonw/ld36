@@ -11,6 +11,8 @@ class RegularPolygonSprite extends FlxTypedGroup<EdgeSprite>
 {
     public var x:Float;
     public var y:Float;
+    public var mx:Float;
+    public var my:Float;
     public var center:Point;
     public var angle:Float;
 
@@ -39,7 +41,9 @@ class RegularPolygonSprite extends FlxTypedGroup<EdgeSprite>
 
         this.x = centerX;
         this.y = centerY;
-        this.center = new Point(x, y);
+        this.mx = x;
+        this.my = y; // TODO: make my = -y and so forth
+        this.center = new Point(mx, my);
         this.angle = angle;
 
         this.RADIUS = radius;
@@ -84,6 +88,7 @@ class RegularPolygonSprite extends FlxTypedGroup<EdgeSprite>
 
         //deal with indicator
         var indicator:EdgeSprite = members[0]; //Anderson likes explicit typing
+        // trace(indicator);
         indicator.x = x + RADIUS*(Math.cos(angle*Math.PI/180)-1)/2;
         indicator.y = y + RADIUS*Math.sin(angle*Math.PI/180)/2 - 2;
         indicator.angle = angle;
@@ -111,17 +116,21 @@ class RegularPolygonSprite extends FlxTypedGroup<EdgeSprite>
     }
 
     public function newUpdate(elapsed:Float, velX:Float, velY:Float, aVel:Float){
-        x += velX * 60 * elapsed;
-        y += velY * 60 * elapsed;
-        center = new Point(x, y);
+        mx += velX * 60 * elapsed;
+        my += velY * 60 * elapsed;
+        center = new Point(mx, my);
+        x = mx;
+        y = my;
+
         angle += aVel * 60 * elapsed;
     }
 
     public function updateEdge(i:Int){
         var rect:EdgeSprite = members[i];
-        rect.x = x + apothemLength*Math.cos(Math.PI/numSides+2*i*Math.PI/numSides + angle*Math.PI/180)-sideLength/2; 
-        rect.y = y + apothemLength*Math.sin(Math.PI/numSides+2*i*Math.PI/numSides + angle*Math.PI/180)-1;
-        rect.angle = (i+0.5)*360.0/numSides + 90 + angle;
+        var rectx = x + apothemLength*Math.cos(Math.PI/numSides+2*i*Math.PI/numSides + angle*Math.PI/180)-sideLength/2;
+        var recty = y + apothemLength*Math.sin(Math.PI/numSides+2*i*Math.PI/numSides + angle*Math.PI/180)-1;
+        var rectAngle = (i+0.5)*360.0/numSides + 90 + angle;
+        rect.setXYA(rectx, recty, rectAngle);
     }
 
     /*
