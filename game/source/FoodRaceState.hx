@@ -37,9 +37,9 @@ class FoodRaceState extends BasicGameState
 		super.create();
         foodI = 4;
         foodX = new Array<Float>();
-        foodX = [width/4,	3*width/4,	width/4,	3*width/4,	width/2];
+        foodX = [width/4,	3*width/4,	width/4,	3*width/4,	width/2, width/2];
         foodY = new Array<Float>();
-        foodY = [height/4,	height/4,	3*height/4,	3*height/4,	height/2];
+        foodY = [height/4,	height/4,	3*height/4,	3*height/4,	5*height/8, 3*height/8];
 
         foodHeld = new Array<Int>();
         foodHeld = [0, 0];
