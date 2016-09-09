@@ -73,6 +73,7 @@ class BasicGameState extends FlxSubState
         velocities.push(new Point(xv, yv, -1));
         aVelocities.push(av);
         add(sprite);
+        FlxG.watch.add(sprite, "center");
         return playSprites.length - 1;
     }
     
@@ -208,7 +209,6 @@ class BasicGameState extends FlxSubState
 
     override public function update(elapsed:Float):Void
     {
-        // TODO: adjust how drag works with frame rate
         super.update(elapsed);
 
         if (!gameStarted)
@@ -244,24 +244,19 @@ class BasicGameState extends FlxSubState
             {    
                 var sprite:RegularPolygonSprite = playSprites[i];
 
-                if(printing || printrightnow){
-                    trace(printing, printrightnow);
-                    trace(velocities[i].x * 60 * elapsed, velocities[i].y * 60 * elapsed);
-                    trace('before', sprite.x, sprite.y);
-                }
+                // if(printing || printrightnow){
+                //     trace(printing, printrightnow);
+                //     trace(velocities[i].x * 60 * elapsed, velocities[i].y * 60 * elapsed);
+                //     trace('before', sprite.x, sprite.y);
+                // }
 
-                // apply velocities
-                // sprite.x += velocities[i].x * 60 * elapsed;
-                // sprite.y += velocities[i].y * 60 * elapsed;
-                // sprite.center = new Point(sprite.x, sprite.y, i);
-                // sprite.angle += aVelocities[i] * 60 * elapsed;
                 sprite.newUpdate(elapsed, velocities[i].x, velocities[i].y, aVelocities[i]);
                 sprite.update(elapsed);
-                // max velocity in game is around 16. theoretical is 20
-                // max angular velocity in game is around 9. theoretical is 10
+                // max observed velocity around 16. theoretical is 20
+                // max observed angular velocity around 9. theoretical is 10
 
-                if(printing || printrightnow)
-                    trace('after', sprite.x, sprite.y);
+                // if(printing || printrightnow)
+                //     trace('after', sprite.x, sprite.y);
                 
                 // apply drags
                 velocities[i].x *= (1 - (1-DRAG) * 60 * elapsed);
@@ -286,17 +281,11 @@ class BasicGameState extends FlxSubState
                 // if(sprite.y < 0 && velocities[i].y < 0) velocities[i].y *= -1;
                 // if(sprite.y > height && velocities[i].y > 0) velocities[i].y *= -1;
 
-                
-
-
             }
 
-            // trace('should be updated, not yet checking collisions');
 
             checkAndHandleCollisions();
             checkAndHandleBoundaryCollisions();
-
-            // trace('         end update');
 
         }
     }
@@ -318,17 +307,19 @@ class BasicGameState extends FlxSubState
     private function checkAndHandleSpriteBoundaryCollision(a:Int, b:Int):Bool
     {
         // get A endpoints
-        var playerASides:Array<EdgeSprite> = playSprites[a].members;
+        var playerASides:Array<EdgeSprite> = playSprites[a].members.slice(1);
         var playerAEndpoints:Array<Point> = new Array<Point>();
-        for (i in 0...playerASides.length)
-        {
-            var rect:EdgeSprite = playerASides[i];
-            var radAngle:Float = rect.angle * Math.PI / 180;
-            var centerX:Float = rect.x + rect.width/2;
-            var centerY:Float = rect.y + rect.height/2;
-            //gets the "left" endpoint of the rectangle
-            playerAEndpoints.push(new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, a));
+        for (i in 0...playerASides.length){
+            playerAEndpoints.push(playerASides[i].p1);
         }
+        // {
+        //     var rect:EdgeSprite = playerASides[i];
+        //     var radAngle:Float = rect.angle * Math.PI / 180;
+        //     var centerX:Float = rect.x + rect.width/2;
+        //     var centerY:Float = rect.y + rect.height/2;
+        //     //gets the "left" endpoint of the rectangle
+        //     playerAEndpoints.push(new Point(centerX - rect.width*Math.cos(radAngle)/2, centerY - rect.width*Math.sin(radAngle)/2, a));
+        // }
 
         var rect = boundingBoxes[b];
         var playerBEndPoints:Array<Point> = new Array<Point>();
@@ -348,7 +339,6 @@ class BasicGameState extends FlxSubState
 
                 var blah = 20;
                 printrightnow = (p.x < 0 + blah || p.x > width - blah || p.y < 0 + blah || p.y > height - blah);
-                // trace('p', printrightnow);
                 
                 blah = 0;
                 if(p.x < 0 + blah|| p.x > width - blah || p.y < 0 + blah || p.y > height - blah){
@@ -580,7 +570,19 @@ class BasicGameState extends FlxSubState
 
         // trace(i, trans, rot, trans+rot);
         return trans + rot;
+    }
 
+    // i: index of the polygon p belongs to
+    private function getVelocityOfPoint(p:Point, i:Int){
+        // translational velocity = velocities[i]
+        
+        // rotational velocity:
+        var r = Point.minus(p, playSprites[i].center);
+        var rperp = new Point(r.y, -r.x);
+        var rv = rperp.scale(aVelocities[i]);
+        
+        var total = Point.plus(velocities[i], rv);
+        return total;
     }
 
     // private function checkCollidePointAndRect(p:Point, rect:FlxSprite, rectIndex:Int){
@@ -607,6 +609,12 @@ class BasicGameState extends FlxSubState
         return points;
     }
 
+    /*
+    p: a point
+    a: index of polygon p belongs to
+    p1, p2: endpoints of a line segment
+    b: index of polygon p1 and p2 belong to
+    */
     private function checkCollidePointAndSegment(p:Point, a:Int, p1:Point, p2:Point, b:Int):Bool{
         
         var currd = getDiscriminant(p, p1, p2);

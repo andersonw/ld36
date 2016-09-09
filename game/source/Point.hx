@@ -1,5 +1,7 @@
 package;
 
+// do not use polyInd
+
 class Point
 {
     public var x:Float;
@@ -10,7 +12,8 @@ class Point
     public function new(x:Float, y:Float, ind:Int = -1){
         this.x = x;
         this.y = y;
-        this.polyInd = ind;
+        // this.polyInd = ind;
+        this.polyInd = -1;
     }
 
     public function add(q:Point):Void{

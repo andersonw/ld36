@@ -80,39 +80,21 @@ class RegularPolygonSprite extends FlxTypedGroup<EdgeSprite>
     }
 
     override public function update(elapsed:Float){
-        // trace('begin polygon update', numSides);
-
-        // trace(x, y, angle);
-        
-        // super.update(elapsed);
 
         //deal with indicator
         var indicator:EdgeSprite = members[0]; //Anderson likes explicit typing
-        // trace(indicator);
         indicator.x = x + RADIUS*(Math.cos(angle*Math.PI/180)-1)/2;
         indicator.y = y + RADIUS*Math.sin(angle*Math.PI/180)/2 - 2;
         indicator.angle = angle;
 
-        for(i in 1...members.length)
-        {
-            // var rect:EdgeSprite = members[i];
-            if(!isExploding){
+        for(i in 1...members.length){
+            if(!isExploding)
                 updateEdge(i);
-            //     rect.x = x + apothemLength*Math.cos(Math.PI/numSides+2*i*Math.PI/numSides + angle*Math.PI/180)-sideLength/2; 
-            //     rect.y = y + apothemLength*Math.sin(Math.PI/numSides+2*i*Math.PI/numSides + angle*Math.PI/180)-1;
-            //     rect.angle = (i+0.5)*360.0/numSides + 90 + angle;
-            }
-            else{
-
-            }
         }
         for(obj in gameObjects){
             obj.update(elapsed);
         }
 
-        // trace(x, y, angle);
-
-        // trace('end polygon update', numSides);
     }
 
     public function newUpdate(elapsed:Float, velX:Float, velY:Float, aVel:Float){
